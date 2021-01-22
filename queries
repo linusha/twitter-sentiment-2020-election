@@ -1,0 +1,23 @@
+# Biden
+[X] twint -s 'Biden' -l 'en' -o 2020-11-03_Biden.csv --since 2020-11-03 --until 2020-11-04 --csv --hashtags --stats -fr --resume 2020-11-03_Biden_resume
+[ ] twint -s 'Biden' -l 'en' -o 2020-11-04_Biden.csv --since 2020-11-04 --until 2020-11-05 --csv --hashtags --stats -fr --resume 2020-11-04_Biden_resume
+
+# Trump
+[(X)] twint -s 'Trump' -l 'en' -o 2020-11-03_Trump.csv --since 2020-11-03 --until 2020-11-04 --csv --hashtags --stats -fr --resume 2020-11-03_Trump_resume
+[ ] twint -s 'Trump' -l 'en' -o 2020-11-04_Trump.csv --since 2020-11-04 --until 2020-11-05 --csv --hashtags --stats -fr --resume 2020-11-04_Trump_resume
+
+# US Election
+[ ] twint -s 'US Election' -l 'en' -o 2020-11-03_US-Election.csv --since 2020-11-03 --until 2020-11-04 --csv --hashtags --stats -fr --resume 2020-11-03_US-Election_resume
+[ ] twint -s 'US Election' -l 'en' -o 2020-11-04_US-Election.csv --since 2020-11-04 --until 2020-11-05 --csv --hashtags --stats -fr --resume 2020-11-05_US-Election_resume
+
+# 2020 Election
+[ ] twint -s '2020 Election' -l 'en' -o 2020-11-03_Trump.csv --since 2020-11-03 --until 2020-11-04 --csv --hashtags --stats -fr --resume 2020-11-03_2020-Election_resume
+[ ] twint -s '2020 Election' -l 'en' -o 2020-11-04_Trump.csv --since 2020-11-04 --until 2020-11-05 --csv --hashtags --stats -fr --resume 2020-11-05_2020-Election_resume
+
+# Republicans
+[ ] twint -s 'Republicans' -l 'en' -o 2020-11-03_Trump.csv --since 2020-11-03 --until 2020-11-04 --csv --hashtags --stats -fr --resume 2020-11-03_Republicans_resume
+[ ] twint -s 'Republicans' -l 'en' -o 2020-11-04_Trump.csv --since 2020-11-04 --until 2020-11-05 --csv --hashtags --stats -fr --resume 2020-11-05_Republicans_resume
+
+# Democrats
+[ ] twint -s 'Democrats' -l 'en' -o 2020-11-03_Trump.csv --since 2020-11-03 --until 2020-11-04 --csv --hashtags --stats -fr --resume 2020-11-03_Democrats_resume
+[ ] twint -s 'Democrats' -l 'en' -o 2020-11-04_Trump.csv --since 2020-11-04 --until 2020-11-05 --csv --hashtags --stats -fr --resume 2020-11-05_Democrats_resume
