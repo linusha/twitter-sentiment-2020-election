@@ -106,16 +106,21 @@ with open(input_file, 'r', newline = '') as i:
                         continue
                 # do not process retweets
                 if (row['retweet'] == 'False'):
+                    # discard tweets without text
+                    if (row['tweet'].strip() == ''):
+                        logging.warning('Discarding tweet {} since it does not contain text.'.format(tweet_counter))
+                        continue
                     # if we get here the tweets qualifies for the data set and will be written to the output
                     qualifying_tweets_counter += 1
+                    try:
+                        detected_language = detect(row['tweet'])
+                        if(detected_language == 'en'):
+                            lang_detect_counter += 1
+                        else:
+                            logging.debug('Tweet: \'{}\' was not detected as english but as {}.'.format(row['tweet'], detected_language))
+                    except:
+                        logging.critical('Language of tweet: \'{}\' could not be detected.'.format(row['tweet']))
 
-                    detected_language = detect(row['tweet'])
-                    if(detected_language == 'en'):
-                        lang_detect_counter += 1
-                    else:
-                        logging.debug('Tweet: \'{}\' was not detected as english but as {}.'.format(row['tweet'], detected_language))
-
-                    
                     output_writer.writerow({'id': row['id'],
                     'conversation_id': row['conversation_id'],
                     'date': row['date'],
