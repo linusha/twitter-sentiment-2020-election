@@ -6,6 +6,8 @@ import logging
 input_file = sys.argv[1]
 output_file = sys.argv[2]
 
+logging.basicConfig(level = logging.DEBUG, filename = 'cleaning.log', filemode = 'a', format = '%(asctime)s - %(levelname)s - %(message)s')
+
 input_fieldnames = ['id', 
     'conversation_id',
     'created_at',
@@ -77,7 +79,7 @@ with open(input_file, 'r', newline = '') as i:
         tweet_counter = 0
         for row in input_reader:
             tweet_counter += 1
-            logging.info('Cleaning tweet {} in this file.'.format(tweet_counter))
+            logging.info('Cleaning tweet {} in file {}.'.format(tweet_counter, output_file))
             # skip header line with column names
             if (row['id'] == 'id'):
                 continue
