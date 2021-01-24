@@ -1,6 +1,6 @@
 # process
 
-1. For each **file** run: `sed -i $'s/\t/, /g' file` to convert the csv from `tab` style to being separated by `,` 
+1. For each **file** run: `sed -i $'s/\t/,/g' file` to convert the csv from `tab` style to being separated by `,` 
 2. Run `filter_tweets.py` for all files.
 3. Remove duplicate tweets and merge all tweets in a single `.csv` file
 4. Enrich tweets with additional data that needs to get scraped
