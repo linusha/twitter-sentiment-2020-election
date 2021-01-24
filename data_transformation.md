@@ -21,6 +21,7 @@ For tweets that remain in the sample the following columns are omitted:
 - place
 - language
 - cashtag,
+- retweet
 - near 
 - geo
 - translate
