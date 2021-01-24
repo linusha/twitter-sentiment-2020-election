@@ -2,6 +2,12 @@ import sys
 import csv
 import datetime
 import logging
+from langdetect import DetectorFactory, detect
+
+# Language detection algorithm is non-deterministic,
+# which means that if you try to run it on a text which is either too short or too ambiguous,
+# you might get different results everytime you run it.
+DetectorFactory.seed = 0
 
 input_file = sys.argv[1]
 output_file = sys.argv[2]
@@ -77,12 +83,15 @@ with open(input_file, 'r', newline = '') as i:
     with open(output_file, 'w', newline = '' ) as o:
         output_writer = csv.DictWriter(o, fieldnames = output_fieldnames, delimiter = ',')
         tweet_counter = 0
+        qualifying_tweets_counter = 0
+        # count how many tweets would be detected as english by langdetect
+        lang_detect_counter = 0
         for row in input_reader:
-            tweet_counter += 1
-            logging.info('Cleaning tweet {} in file {}.'.format(tweet_counter, output_file))
             # skip header line with column names
             if (row['id'] == 'id'):
                 continue
+            tweet_counter += 1
+            logging.info('Cleaning tweet {} in file {}.'.format(tweet_counter, output_file))
             # only process english tweets further
             if (row['language'] == 'en'):
                 # due to time difference we want to discard everything later than 7am
@@ -98,6 +107,15 @@ with open(input_file, 'r', newline = '') as i:
                 # do not process retweets
                 if (row['retweet'] == 'False'):
                     # if we get here the tweets qualifies for the data set and will be written to the output
+                    qualifying_tweets_counter += 1
+
+                    detected_language = detect(row['tweet'])
+                    if(detected_language == 'en'):
+                        lang_detect_counter += 1
+                    else:
+                        logging.debug('Tweet: \'{}\' was not detected as english but as {}.'.format(row['tweet'], detected_language))
+
+                    
                     output_writer.writerow({'id': row['id'],
                     'conversation_id': row['conversation_id'],
                     'date': row['date'],
@@ -128,4 +146,5 @@ with open(input_file, 'r', newline = '') as i:
                     logging.warning('Discarding tweet {} since it is a retweet.'.format(tweet_counter))
             else:
                 logging.warning('Discarding tweet {} since it is not english.'.format(tweet_counter))
+        print('Of {} tweets in file {}, {} would have been detected as english by langdetect.'.format(tweet_counter, input_file, lang_detect_counter))
         
