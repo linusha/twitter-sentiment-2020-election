@@ -1,10 +1,9 @@
 # process
 
-1. For each **file** run: `sed -i $'s/\t/,/g' file` to convert the csv from `tab` style to being separated by `,` 
-2. Run `filter_tweets.py` for all files.
-3. Remove duplicate tweets and merge all tweets in a single `.csv` file
-4. Enrich tweets with additional data that needs to get scraped
-5. analyze sentiment of all tweets
+1. Run `filter_tweets.py` for all files.
+2. Remove duplicate tweets and merge all tweets in a single `.csv` file
+3. Enrich tweets with additional data that needs to get scraped
+4. analyze sentiment of all tweets
 
 ## `filter_and_clean_tweets.py`
 
@@ -27,6 +26,8 @@ For tweets that remain in the sample the following columns are omitted:
 - translate
 - trans_src
 - trans_dest
+
+To run the script cleaning.log must exist. The script will convert from a `tab` separated input file to an output file separated by `,`.
 
 ### Plausibility check: languages:
 
