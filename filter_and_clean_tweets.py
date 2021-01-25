@@ -104,6 +104,9 @@ with open(input_file, 'r', newline = '') as i:
                     if (int(row['time'][:2])<4):
                         logging.warning('Discarding tweet {} since it was made too early on 11-03.'.format(tweet_counter))
                         continue
+                elif (row['date'] == '2020-11-05'):
+                        logging.warning('Discarding tweet {} since it was made too late on 11-04.'.format(tweet_counter))
+                        continue
                 # do not process retweets
                 if (row['retweet'] == 'False'):
                     # discard tweets without text
