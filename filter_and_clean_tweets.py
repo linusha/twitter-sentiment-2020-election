@@ -166,5 +166,5 @@ with open(input_file, 'r', newline = '') as i:
                     logging.warning('Discarding tweet {} since it is a retweet.'.format(tweet_counter))
             else:
                 logging.warning('Discarding tweet {} since it is not english.'.format(tweet_counter))
-        print('Of {} tweets in file {}, {} would have been detected as english by langdetect.'.format(tweet_counter, input_file, lang_detect_counter))
+        print('Of {} cleaned tweets from file {}, {} would have been detected as english by langdetect.'.format(qualifying_tweets_counter, input_file, lang_detect_counter))
         
