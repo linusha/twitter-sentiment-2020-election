@@ -14,6 +14,18 @@ output_file = sys.argv[2]
 
 logging.basicConfig(level = logging.DEBUG, filename = 'cleaning.log', filemode = 'a', format = '%(asctime)s - %(levelname)s - %(message)s')
 
+# https://stackoverflow.com/questions/26050968/line-contains-null-byte-error-in-python-csv-reader
+def nullbyte_resistent_reader(csv_dict_reader):
+    while True:
+        try:
+            yield next(csv_dict_reader)
+        except csv.Error:
+            logging.critical('Row discarded due to NULL Byte.')
+            print('Row discarded due to NULL Byte.')
+            pass
+        continue
+    return
+
 input_fieldnames = ['id', 
     'conversation_id',
     'created_at',
@@ -79,7 +91,7 @@ output_fieldnames = ['id',
     'retweet_date']
 
 with open(input_file, 'r', newline = '') as i:
-    input_reader = csv.DictReader(i, fieldnames = input_fieldnames, delimiter = '\t')
+    input_reader = nullbyte_resistent_reader(csv.DictReader(i, fieldnames = input_fieldnames, delimiter = '\t'))
     with open(output_file, 'w', newline = '' ) as o:
         output_writer = csv.DictWriter(o, fieldnames = output_fieldnames, delimiter = ',')
         tweet_counter = 0
