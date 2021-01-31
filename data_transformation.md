@@ -35,5 +35,9 @@ To run the script cleaning.log must exist. The script will convert from a `tab` 
 
 ## remove duplicate tweets 
 
-`awk '!a[$0]++' file1.cvs file2.cvs`
+`awk '!a[$0]++' *.csv.clean > deduplicated_tweets.csv.clean`
+
+## enrich data and prepare for analysis
+
+
 
