@@ -219,62 +219,63 @@ with open(INPUT_FILE, 'r', newline='') as i:
     # read everything into main memory for easier aggregation of user data
     for row in INPUT_READER:
         ALL_TWEETS_DATA.append(row)
+    INPUT_FILE.close()
 
-    # process each tweet
-    for row in ALL_TWEETS_DATA:
-        curr_user = row['username']
+# process each tweet
+for row in ALL_TWEETS_DATA:
+    curr_user = row['username']
 
-        # a url is contained
-        if row['urls'].strip() != '':
-            urls = 1
-        else:
-            urls = 0
+    # a url is contained
+    if row['urls'].strip() != '':
+        urls = 1
+    else:
+        urls = 0
 
-        # a hashtag is contained
-        if row['hashtags'].strip() != '':
-            hashtags = 1
-        else:
-            hashtags = 0
+    # a hashtag is contained
+    if row['hashtags'].strip() != '':
+        hashtags = 1
+    else:
+        hashtags = 0
 
+    try:
+        cleaned_tweet = clean_tweet(row['tweet'])
+    except TweetLanguageNotEnglishException:
+        logging.error('Tweet: %s was not detected as english.', row['tweet'])
+        continue
+
+    try:
+        user_follower_count_for_row = get_follower_count_for_user(curr_user)
+    except UserInfoNotFoundException:
+        logging.error('Follower Info for %s could not be scraped.', curr_user)
+
+    try:
+        user_activity_count_for_row = get_user_activity_for_user(curr_user)
+    except InvalidUserActivityException:
+        logging.fatal('Activity for user %s could not be retrieved!', curr_user)
+        # this indicates a problem on our side, we need to investigate!
+        sys.exit(1)
+
+    if int(row['retweets_count'].strip()) != 0:
         try:
-            cleaned_tweet = clean_tweet(row['tweet'])
-        except TweetLanguageNotEnglishException:
-            logging.error('Tweet: %s was not detected as english.', row['tweet'])
+            retweet_delay = get_retweet_delay_for_tweet(row)
+        except NoRetweetsFoundException:
+            logging.error('Retweets for %s could not be scraped.', row['tweet'])
             continue
+    else:
+        # convention
+        retweet_delay = 0
 
-        try:
-            user_follower_count_for_row = get_follower_count_for_user(curr_user)
-        except UserInfoNotFoundException:
-            logging.error('Follower Info for %s could not be scraped.', curr_user)
-
-        try:
-            user_activity_count_for_row = get_user_activity_for_user(curr_user)
-        except InvalidUserActivityException:
-            logging.fatal('Activity for user %s could not be retrieved!', curr_user)
-            # this indicates a problem on our side, we need to investigate!
-            sys.exit(1)
-
-        if int(row['retweets_count'].strip()) != 0:
-            try:
-                retweet_delay = get_retweet_delay_for_tweet(row)
-            except NoRetweetsFoundException:
-                logging.error('Retweets for %s could not be scraped.', row['tweet'])
-                continue
-        else:
-            # convention
-            retweet_delay = 0
-
-        queue_output_for_row({
-            'orig_tweet': row['tweet'],
-            'clean_tweet': cleaned_tweet,
-            'hashtag': hashtags,
-            'url': urls,
-            'likes':row['likes_count'],
-            'retweets':row['retweets_count'],
-            'followers': user_follower_count_for_row,
-            'activity': user_activity_count_for_row,
-            'timedelay': retweet_delay
-            })
+    queue_output_for_row({
+        'orig_tweet': row['tweet'],
+        'clean_tweet': cleaned_tweet,
+        'hashtag': hashtags,
+        'url': urls,
+        'likes':row['likes_count'],
+        'retweets':row['retweets_count'],
+        'followers': user_follower_count_for_row,
+        'activity': user_activity_count_for_row,
+        'timedelay': retweet_delay
+    })
 
 # write output with main data for later analysis
 with open(OUTPUT_FILE_ALL, 'w', newline='') as o_all:
