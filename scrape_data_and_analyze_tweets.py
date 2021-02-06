@@ -20,6 +20,7 @@ OUTPUT_FIELDS_ALL = ['orig_tweet',
                      'url',
                      'likes',
                      'retweets',
+                     'replies',
                      'followers',
                      'activity',
                      'timedelay']
@@ -67,9 +68,13 @@ def get_follower_count_for_user(username):
         twint.run.Lookup(conf)
     except:
         logging.fatal('Scraping of user data failed for %s.', username)
-    follower_count = twint.output.users_list[0].followers
-    if not follower_count:
-        raise UserInfoNotFoundException
+    try:
+        follower_count = twint.output.users_list[0].followers
+        if not follower_count:
+            raise UserInfoNotFoundException
+    except IndexError:
+        logging.fatal('Scraping for user data of %s returned empty list', username)
+        sys.exit(1)
     USER_FOLLOWERS[username] = follower_count
     return follower_count
 
@@ -219,9 +224,21 @@ with open(INPUT_FILE, 'r', newline='') as i:
 
     # read everything into main memory for easier aggregation of user data
     for row in INPUT_READER:
-        ALL_TWEETS_DATA.append(row)
+        ALL_TWEETS_DATA.append(
+            {
+                'date': row['date'],
+                'time': row['time'],
+                'username': row['username'],
+                'tweet': row['tweet'],
+                'urls': row['urls'],
+                'retweets_count': row['retweets_count'],
+                'likes_count': row['likes_count'],
+                'replies_count': row['replies_count'],
+                'hashtags': row['hashtags']
+            }
+        )
     i.close()
-print('Read data from input file.')
+print('Read data from input file. Read %i entries.', len(ALL_TWEETS_DATA))
 
 print('Begin to aggregate user activities.')
 init_user_activity()
@@ -229,61 +246,62 @@ print('Finished to aggregate user activities.')
 
 # process each tweet
 while ALL_TWEETS_DATA:
-    row = ALL_TWEETS_DATA.pop(0)
+    ROW = ALL_TWEETS_DATA.pop(0)
     print('Starting to work on a new tweet.')
-    curr_user = row['username']
+    CURR_USER = row['username']
 
     # a url is contained
-    if row['urls'].strip() != '':
-        urls = 1
+    if ROW['urls'].strip() != '':
+        URLS = 1
     else:
-        urls = 0
+        URLS = 0
 
     # a hashtag is contained
-    if row['hashtags'].strip() != '':
-        hashtags = 1
+    if ROW['hashtags'].strip() != '':
+        HASHTAGS = 1
     else:
-        hashtags = 0
+        HASHTAGS = 0
 
     try:
-        cleaned_tweet = clean_tweet(row['tweet'])
+        CLEANED_TWEET = clean_tweet(ROW['tweet'])
     except TweetLanguageNotEnglishException:
-        logging.error('Tweet: %s was not detected as english.', row['tweet'])
+        logging.error('Tweet: %s was not detected as english.', ROW['tweet'])
         continue
 
     try:
-        user_follower_count_for_row = get_follower_count_for_user(curr_user)
+        USER_FOLLOWER_COUNT_FOR_ROW = get_follower_count_for_user(CURR_USER)
     except UserInfoNotFoundException:
-        logging.error('Follower Info for %s could not be scraped.', curr_user)
+        logging.error('Follower Info for %s could not be scraped.', CURR_USER)
         continue
 
     try:
-        user_activity_count_for_row = get_user_activity_for_user(curr_user)
+        USER_ACTIVITY_COUNT_FOR_ROW = get_user_activity_for_user(CURR_USER)
     except InvalidUserActivityException:
-        logging.fatal('Activity for user %s could not be retrieved!', curr_user)
+        logging.fatal('Activity for user %s could not be retrieved!', CURR_USER)
         # this indicates a problem on our side, we need to investigate!
         sys.exit(1)
 
-    if int(row['retweets_count'].strip()) != 0:
+    if int(ROW['retweets_count'].strip()) != 0:
         try:
-            retweet_delay = get_retweet_delay_for_tweet(row)
+            RETWEET_DELAY = get_retweet_delay_for_tweet(ROW)
         except NoRetweetsFoundException:
-            logging.error('Retweets for %s could not be scraped.', row['tweet'])
+            logging.error('Retweets for %s could not be scraped.', ROW['tweet'])
             continue
     else:
         # convention
-        retweet_delay = 0
+        RETWEET_DELAY = 0
 
     queue_output_for_row({
-        'orig_tweet': row['tweet'],
-        'clean_tweet': cleaned_tweet,
-        'hashtag': hashtags,
-        'url': urls,
-        'likes':row['likes_count'],
-        'retweets':row['retweets_count'],
-        'followers': user_follower_count_for_row,
-        'activity': user_activity_count_for_row,
-        'timedelay': retweet_delay
+        'orig_tweet': ROW['tweet'],
+        'clean_tweet': CLEANED_TWEET,
+        'hashtag': HASHTAGS,
+        'url': URLS,
+        'likes': ROW['likes_count'],
+        'retweets': ROW['retweets_count'],
+        'replies': ROW['replies_count'],
+        'followers': USER_FOLLOWER_COUNT_FOR_ROW,
+        'activity': USER_ACTIVITY_COUNT_FOR_ROW,
+        'timedelay': RETWEET_DELAY
     })
 
 # write output with main data for later analysis
