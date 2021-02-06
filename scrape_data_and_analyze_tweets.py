@@ -11,6 +11,11 @@ from nltk.tokenize import TweetTokenizer
 from nltk.stem import PorterStemmer
 
 print('Script started.')
+if sys.argv[4]:
+    RESUME_MODE = TRUE
+    RESUME_COUNTER = sys.argv[5]
+else:
+    RESUME_MODE = FALSE
 
 USER_ACTIVITY = {}
 OUTPUT_FIELDS_TWEETS = ['tweet']
@@ -238,11 +243,15 @@ with open(INPUT_FILE, 'r', newline='') as i:
             }
         )
     i.close()
-print('Read data from input file. Read %i entries.', len(ALL_TWEETS_DATA))
+print('Read data from input file. Read %s entries.', len(ALL_TWEETS_DATA))
 
 print('Begin to aggregate user activities.')
 init_user_activity()
 print('Finished to aggregate user activities.')
+
+if RESUME_MODE:
+    ALL_TWEETS_DATA = ALL_TWEETS_DATA[RESUME_COUNTER+1:]
+    print('Resume from line %s.', RESUME_COUNTER+1)
 
 # process each tweet
 while ALL_TWEETS_DATA:
@@ -305,7 +314,7 @@ while ALL_TWEETS_DATA:
     })
 
     # write output with main data for later analysis
-    with open(OUTPUT_FILE_ALL, 'a', newline='') as o_all:
+    with open(OUTPUT_FILE_ALimmi, 'a', newline='') as o_all:
         ALL_WRITER = csv.DictWriter(o_all, fieldnames=OUTPUT_FIELDS_ALL, delimiter=',')
         ALL_WRITER.writerow(output_for_row)
 
