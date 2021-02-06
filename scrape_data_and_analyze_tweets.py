@@ -291,7 +291,7 @@ while ALL_TWEETS_DATA:
         # convention
         RETWEET_DELAY = 0
 
-    queue_output_for_row({
+    output_for_row = ({
         'orig_tweet': ROW['tweet'],
         'clean_tweet': CLEANED_TWEET,
         'hashtag': HASHTAGS,
@@ -304,12 +304,15 @@ while ALL_TWEETS_DATA:
         'timedelay': RETWEET_DELAY
     })
 
-# write output with main data for later analysis
-with open(OUTPUT_FILE_ALL, 'w', newline='') as o_all:
-    ALL_WRITER = csv.DictWriter(o_all, fieldnames=OUTPUT_FIELDS_ALL, delimiter=',')
-    ALL_WRITER.writerows(OUTPUT_DATA_ALL)
+    # write output with main data for later analysis
+    with open(OUTPUT_FILE_ALL, 'a', newline='') as o_all:
+        ALL_WRITER = csv.DictWriter(o_all, fieldnames=OUTPUT_FIELDS_ALL, delimiter=',')
+        ALL_WRITER.writerow(output_for_row)
 
-# write output with tweets to reuse in sentistrength
-with open(OUTPUT_FILE_TWEETS, 'w', newline='') as o_tweets:
-    TWEETS_WRITER = csv.DictWriter(o_tweets, fieldnames=OUTPUT_FIELDS_TWEETS, delimiter=',')
-    TWEETS_WRITER.writerows(OUTPUT_DATA_TWEETS)
+    # write output with tweets to reuse in sentistrength
+    with open(OUTPUT_FILE_TWEETS, 'a', newline='') as o_tweets:
+        TWEETS_WRITER = csv.DictWriter(o_tweets, fieldnames=OUTPUT_FIELDS_TWEETS, delimiter=',')
+        TWEETS_WRITER.writerow({'tweet': output_for_row['clean_tweet']})
+
+o_all.close()
+o_tweets.close()
