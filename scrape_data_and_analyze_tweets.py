@@ -95,6 +95,8 @@ def clean_tweet(tweet):
     tweet = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", '', tweet)
     #remove all urls
     tweet = remove_urls_from_text(tweet)
+    # remove hashtags but preserve words
+    tweet = tweet.replace('#', '')
 
     tknzr = TweetTokenizer(strip_handles=True, reduce_len=True, preserve_case=False)
     stmmr = PorterStemmer()
@@ -103,7 +105,7 @@ def clean_tweet(tweet):
     for token in tweet_tokens:
         stemmed_token = stmmr.stem(token)
         tweet_cleaned.append(stemmed_token)
-    ' '.join(tweet_cleaned)
+    tweet_cleaned = ' '.join(tweet_cleaned)
     if detect(tweet_cleaned) != 'en':
         raise TweetLanguageNotEnglishException
     return tweet_cleaned
