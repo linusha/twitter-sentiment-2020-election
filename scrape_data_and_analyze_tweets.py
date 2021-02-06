@@ -220,7 +220,7 @@ with open(INPUT_FILE, 'r', newline='') as i:
     # read everything into main memory for easier aggregation of user data
     for row in INPUT_READER:
         ALL_TWEETS_DATA.append(row)
-    INPUT_FILE.close()
+    i.close()
 print('Read data from input file.')
 
 print('Begin to aggregate user activities.')
@@ -228,7 +228,8 @@ init_user_activity()
 print('Finished to aggregate user activities.')
 
 # process each tweet
-for row in ALL_TWEETS_DATA:
+while ALL_TWEETS_DATA:
+    row = ALL_TWEETS_DATA.pop(0)
     print('Starting to work on a new tweet.')
     curr_user = row['username']
 
