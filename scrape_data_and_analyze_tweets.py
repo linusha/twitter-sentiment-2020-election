@@ -29,7 +29,7 @@ TRANSLATE_TABLE = dict((ord(char), None) for char in string.punctuation)
 #######################################################################
 ########################## CUSTOM EXCEPTIONS ##########################
 #######################################################################
-class TweetlanguageNotEnglish(Exception):
+class TweetLanguageNotEnglishException(Exception):
     pass
 
 class NoRetweetsFoundException(Exception):
@@ -104,7 +104,8 @@ def clean_tweet(tweet):
         stemmed_token = stmmr.stem(token)
         tweet_cleaned.append(stemmed_token)
     ' '.join(tweet_cleaned)
-
+    if detect(tweet_cleaned) != 'en':
+        raise TweetLanguageNotEnglishException
     return tweet_cleaned
 
 # this functions returns the difference between the post time of a tweet
@@ -224,10 +225,10 @@ with open(INPUT_FILE, 'r', newline='') as i:
 
         try:
             cleaned_tweet = clean_tweet(row['tweet'])
-        except TweetlanguageNotEnglish:
+        except TweetLanguageNotEnglishException:
             logging.error('Tweet: \'{}\' was not detected as english.'.format(row['tweet']))
             continue
-        
+
         try:
             user_follower_count_for_row = get_follower_count_for_user(curr_user)
         except UserInfoNotFoundException:
