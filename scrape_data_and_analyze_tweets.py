@@ -4,7 +4,10 @@ import datetime
 import logging
 import re
 import twint
+import string
 from langdetect import DetectorFactory, detect
+from nltk.tokenize import TweetTokenizer
+from nltk.stem import PorterStemmer
 
 user_activity = {}
 OUTPUT_FIELDS_TWEETS = ['tweet']
@@ -21,11 +24,21 @@ ALL_TWEETS_DATA = []
 USER_FOLLOWERS = {}
 OUTPUT_DATA_TWEETS = []
 OUTPUT_DATA_ALL = []
+TRANSLATE_TABLE = dict((ord(char), None) for char in string.punctuation)
 
 #######################################################################
 ########################## CUSTOM EXCEPTIONS ##########################
 #######################################################################
 class TweetlanguageNotEnglish(Exception):
+    pass
+
+class NoRetweetsFoundException(Exception):
+    pass
+
+class UserInfoNotFoundException(Exception):
+    pass
+
+class InvalidUserActivityException(Exception):
     pass
 
 #######################################################################
@@ -38,7 +51,6 @@ def remove_urls_from_string(string):
                   r'https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.'
                   r'[a-zA-Z0-9]+\.[^\s]{2,})', '', string)
 
-# TODO: add error handling
 def get_follower_count_for_user(username):
     followers_if_existing = USER_FOLLOWERS.get(username)
     if followers_if_existing != None:
@@ -50,6 +62,8 @@ def get_follower_count_for_user(username):
     c.Store_object = True
     twint.run.Lookup(c)
     follower_count = twint.output.users_list[0].followers
+    if not follower_count:
+        raise UserInfoNotFoundException
     USER_FOLLOWERS[username] = follower_count
     return follower_count
 
@@ -65,9 +79,14 @@ def init_user_activity():
             user_activity[user_for_curr_tweet] += 1
 
 def get_user_activity_for_user(username):
-    return user_activity.get(username)
+    activity = user_activity.get(username)
+    if activity >= 1:
+        return activity
+    else:
+        # since this is only dependent on our already scraped data
+        # this should never happen!
+        raise InvalidUserActivityException 
 
-#TODO: implement
 def clean_tweet(tweet):
     original_tweet = tweet
     # convert to lowercase
@@ -76,21 +95,28 @@ def clean_tweet(tweet):
     tweet = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", '', tweet)
     #remove all urls
     tweet = remove_urls_from_string(tweet)
-    return NotImplemented
+
+    tknzr = TweetTokenizer(strip_handles=True, reduce_len=True, preserve_case=False)
+    stmmr = PorterStemmer()
+    tweet_tokens = tknzr.tokenize(tweet)
+    tweet_cleaned = []
+    for token in tweet_tokens:
+        stemmed_token = stmmr.stem(token)
+        tweet_cleaned.append(stemmed_token)
+    ' '.join(tweet_cleaned)
+
+    return tweet_cleaned
 
 # this functions returns the difference between the post time of a tweet
 # and its first retweet in seconds
-#TODO: error handling
 def get_retweet_delay_for_tweet(row):
-    # collect all retweets available
-    #
     tweet = row['tweet']
     # remove emails, since they lead to emtpy twitter search results
-    tweet = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", '', tweet)
+    tweet_clean = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", '', tweet)
     # remove urls as well as a safety measure
-    tweet = remove_urls_from_string(tweet)
+    tweet_clean = remove_urls_from_string(tweet_clean)
     c = twint.Config()
-    c.Search = tweet
+    c.Search = tweet_clean
     c.Native_retweets = True
     c.Store_object = True
     retweets_of_row_tweet = []
@@ -99,12 +125,15 @@ def get_retweet_delay_for_tweet(row):
 
     minimal_date = ''
     minimal_time = ''
+    if not retweets_of_row_tweet:
+        raise NoRetweetsFoundException
+
     for tweet in retweets_of_row_tweet:
         if minimal_date is None or minimal_date >= tweet['datestamp']:
             if minimal_time is None or minimal_time >= tweet['timestamp']:
                 minimal_time = tweet['timestamp']
                 minimal_date = tweet['datestamp']
-    retweet_delay = convert_strs_to_time(minimal_date, minimal_time) - convert_strs_to_time(tweet['datestamp'], tweet['timestamp'])
+    retweet_delay = convert_strs_to_time(minimal_date, minimal_time) - convert_strs_to_time(row['datestamp'], row['timestamp'])
     return retweet_delay.total_seconds()
 
 # converts two strings into a single datetime object
@@ -193,14 +222,30 @@ with open(INPUT_FILE, 'r', newline='') as i:
         else:
             hashtags = 0
 
-        # TODO: handle not english exception
-        # TODO: gracefully handle other problems while cleaning
-        cleaned_tweet = clean_tweet(row['tweet'])
+        try:
+            cleaned_tweet = clean_tweet(row['tweet'])
+        except TweetlanguageNotEnglish:
+            logging.error('Tweet: \'{}\' was not detected as english.'.format(row['tweet']))
+            continue
+        
+        try:
+            user_follower_count_for_row = get_follower_count_for_user(curr_user)
+        except UserInfoNotFoundException:
+            logging.error('Follower Info for \'{}\' could not be scraped.'.format(curr_user))
+        
+        try:
+            user_activity_count_for_row = get_user_activity_for_user(curr_user)
+        except InvalidUserActivityException:
+            logging.fatal('Activity for user \'{}\' could not be retrieved!'.format(curr_user))
+            # this indicates a problem on our side, we need to investigate!
+            sys.exit(1)
 
-        user_follower_count_for_row = get_follower_count_for_user(curr_user)
-        user_activity_count_for_row = get_user_activity_for_user(curr_user)
         if int(row['retweets_count'].strip()) != 0:
-            retweet_delay = get_retweet_delay_for_tweet(row)
+            try:
+                retweet_delay = get_retweet_delay_for_tweet(row)
+            except NoRetweetsFoundException:
+                logging.error('Retweets for \'{}\' could not be scraped.'.format(row['tweet']))
+                continue
         else:
             # convention
             retweet_delay = 0
