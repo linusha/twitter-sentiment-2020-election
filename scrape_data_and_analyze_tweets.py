@@ -58,15 +58,19 @@ def get_follower_count_for_user(username):
         return followers_if_existing
 
     # we need to scrape the information from twitter
-    conf = twint.Config()
-    conf.Username = username
-    conf.Store_object = True
-    twint.run.Lookup(conf)
+    try:
+        conf = twint.Config()
+        conf.Username = username
+        conf.Store_object = True
+        twint.run.Lookup(conf)
+    except:
+        logging.fatal('Scraping of user data failed for %s.', username)
     follower_count = twint.output.users_list[0].followers
     if not follower_count:
         raise UserInfoNotFoundException
     USER_FOLLOWERS[username] = follower_count
     return follower_count
+
 
 def init_user_activity():
     for entry in ALL_TWEETS_DATA:
@@ -118,13 +122,16 @@ def get_retweet_delay_for_tweet(entry):
     tweet_clean = re.sub(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+", '', tweet)
     # remove urls as well as a safety measure
     tweet_clean = remove_urls_from_text(tweet_clean)
-    conf = twint.Config()
-    conf.Search = tweet_clean
-    conf.Native_retweets = True
-    conf.Store_object = True
-    retweets_of_row_tweet = []
-    conf.Store_object_tweets_list = retweets_of_row_tweet
-    twint.run.Search(conf)
+    try:
+        conf = twint.Config()
+        conf.Search = tweet_clean
+        conf.Native_retweets = True
+        conf.Store_object = True
+        retweets_of_row_tweet = []
+        conf.Store_object_tweets_list = retweets_of_row_tweet
+        twint.run.Search(conf)
+    except:
+        logging.fatal('Scraping of retweets failed for: %s', tweet_clean)
 
     minimal_date = ''
     minimal_time = ''
