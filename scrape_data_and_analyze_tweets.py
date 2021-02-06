@@ -10,6 +10,8 @@ from langdetect import DetectorFactory, detect
 from nltk.tokenize import TweetTokenizer
 from nltk.stem import PorterStemmer
 
+print('Script started.')
+
 USER_ACTIVITY = {}
 OUTPUT_FIELDS_TWEETS = ['tweet']
 OUTPUT_FIELDS_ALL = ['orig_tweet',
@@ -211,6 +213,7 @@ INPUT_FIELDNAMES = ['id',
                     'reply_to',
                     'retweet_date']
 
+print('Beginning to read data from input file.')
 with open(INPUT_FILE, 'r', newline='') as i:
     INPUT_READER = csv.DictReader(i, fieldnames=INPUT_FIELDNAMES, delimiter=',')
 
@@ -218,11 +221,15 @@ with open(INPUT_FILE, 'r', newline='') as i:
     for row in INPUT_READER:
         ALL_TWEETS_DATA.append(row)
     INPUT_FILE.close()
+print('Read data from input file.')
 
+print('Begin to aggregate user activities.')
 init_user_activity()
+print('Finished to aggregate user activities.')
 
 # process each tweet
 for row in ALL_TWEETS_DATA:
+    print('Starting to work on a new tweet.')
     curr_user = row['username']
 
     # a url is contained
