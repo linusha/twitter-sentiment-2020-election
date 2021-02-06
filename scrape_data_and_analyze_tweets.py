@@ -184,7 +184,7 @@ DetectorFactory.seed = 0
 
 INPUT_FILE = sys.argv[1]
 OUTPUT_FILE_ALL = sys.argv[2]
-OUTPUT_FILE_TWEETS = sys.argv[2]
+OUTPUT_FILE_TWEETS = sys.argv[3]
 
 logging.basicConfig(level=logging.DEBUG,
                     filename='finalize_data.log',
