@@ -184,8 +184,6 @@ logging.basicConfig(level=logging.DEBUG,
                     filemode='a',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-init_user_activity()
-
 INPUT_FIELDNAMES = ['id',
                     'conversation_id',
                     'date',
@@ -221,6 +219,8 @@ with open(INPUT_FILE, 'r', newline='') as i:
         ALL_TWEETS_DATA.append(row)
     INPUT_FILE.close()
 
+init_user_activity()
+
 # process each tweet
 for row in ALL_TWEETS_DATA:
     curr_user = row['username']
@@ -247,6 +247,7 @@ for row in ALL_TWEETS_DATA:
         user_follower_count_for_row = get_follower_count_for_user(curr_user)
     except UserInfoNotFoundException:
         logging.error('Follower Info for %s could not be scraped.', curr_user)
+        continue
 
     try:
         user_activity_count_for_row = get_user_activity_for_user(curr_user)
