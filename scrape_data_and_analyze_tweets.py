@@ -130,6 +130,9 @@ def get_retweet_delay_for_tweet(entry):
         raise NoRetweetsFoundException
 
     for tweet in retweets_of_row_tweet:
+        if not tweet['tweet'].startswith('RT  @' + entry['screenname']):
+            # we did not find a retweet from the user that we are looking for
+            continue
         if minimal_date is None or minimal_date >= tweet['datestamp']:
             if minimal_time is None or minimal_time >= tweet['timestamp']:
                 minimal_time = tweet['timestamp']
