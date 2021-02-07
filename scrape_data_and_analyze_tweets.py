@@ -4,18 +4,18 @@ import datetime
 import logging
 import re
 import string
-
+import pdb
 import twint
 from langdetect import DetectorFactory, detect
 from nltk.tokenize import TweetTokenizer
 from nltk.stem import PorterStemmer
 
 print('Script started.')
-if sys.argv[4]:
-    RESUME_MODE = TRUE
+if (len(sys.argv) == 5):
+    RESUME_MODE = True
     RESUME_COUNTER = sys.argv[5]
 else:
-    RESUME_MODE = FALSE
+    RESUME_MODE = False
 
 USER_ACTIVITY = {}
 OUTPUT_FIELDS_TWEETS = ['tweet']
@@ -28,7 +28,8 @@ OUTPUT_FIELDS_ALL = ['orig_tweet',
                      'replies',
                      'followers',
                      'activity',
-                     'timedelay']
+                     'timedelay',
+                     'all_tweets']
 ALL_TWEETS_DATA = []
 USER_FOLLOWERS = {}
 OUTPUT_DATA_TWEETS = []
@@ -60,7 +61,8 @@ def remove_urls_from_text(text):
                   r'https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.'
                   r'[a-zA-Z0-9]+\.[^\s]{2,})', '', text)
 
-def get_follower_count_for_user(username):
+def get_follower_and_tweet_count_for_user(username):
+    pdb.set_trace()
     followers_if_existing = USER_FOLLOWERS.get(username)
     if followers_if_existing != None:
         return followers_if_existing
@@ -73,15 +75,19 @@ def get_follower_count_for_user(username):
         twint.run.Lookup(conf)
     except:
         logging.fatal('Scraping of user data failed for %s.', username)
+        raise UserInfoNotFoundException
+
     try:
-        follower_count = twint.output.users_list[0].followers
+        pdb.set_trace()
+        follower_count = twint.output.users_list[-1].followers
+        tweet_count = twint.output.users_list[-1].tweets
         if not follower_count:
             raise UserInfoNotFoundException
     except IndexError:
         logging.fatal('Scraping for user data of %s returned empty list', username)
         sys.exit(1)
-    USER_FOLLOWERS[username] = follower_count
-    return follower_count
+    USER_FOLLOWERS[username] = (follower_count, tweet_count)
+    return (follower_count, tweet_count)
 
 
 def init_user_activity():
@@ -151,7 +157,8 @@ def get_retweet_delay_for_tweet(entry):
         raise NoRetweetsFoundException
 
     for tweet in retweets_of_row_tweet:
-        if not tweet['tweet'].startswith('RT  @' + entry['screenname']):
+        text = tweet.tweet.strip()
+        if not text.startswith('RT  @' + entry['screenname']):
             # we did not find a retweet from the user that we are looking for
             continue
         if minimal_date is None or minimal_date >= tweet['datestamp']:
@@ -243,7 +250,7 @@ with open(INPUT_FILE, 'r', newline='') as i:
             }
         )
     i.close()
-print('Read data from input file. Read %s entries.', len(ALL_TWEETS_DATA))
+print('Read data from input file. Read %d entries.', len(ALL_TWEETS_DATA))
 
 print('Begin to aggregate user activities.')
 init_user_activity()
@@ -251,13 +258,13 @@ print('Finished to aggregate user activities.')
 
 if RESUME_MODE:
     ALL_TWEETS_DATA = ALL_TWEETS_DATA[RESUME_COUNTER+1:]
-    print('Resume from line %s.', RESUME_COUNTER+1)
+    print('Resume from line %d.', RESUME_COUNTER+1)
 
 # process each tweet
 while ALL_TWEETS_DATA:
     ROW = ALL_TWEETS_DATA.pop(0)
     print('Starting to work on a new tweet.')
-    CURR_USER = row['username']
+    CURR_USER = ROW['username']
 
     # a url is contained
     if ROW['urls'].strip() != '':
@@ -278,7 +285,7 @@ while ALL_TWEETS_DATA:
         continue
 
     try:
-        USER_FOLLOWER_COUNT_FOR_ROW = get_follower_count_for_user(CURR_USER)
+        USER_FOLLOWER_COUNT_FOR_ROW, USER_TWEET_COUNT_FOR_ROW = get_follower_and_tweet_count_for_user(CURR_USER)
     except UserInfoNotFoundException:
         logging.error('Follower Info for %s could not be scraped.', CURR_USER)
         continue
@@ -310,11 +317,12 @@ while ALL_TWEETS_DATA:
         'replies': ROW['replies_count'],
         'followers': USER_FOLLOWER_COUNT_FOR_ROW,
         'activity': USER_ACTIVITY_COUNT_FOR_ROW,
-        'timedelay': RETWEET_DELAY
+        'timedelay': RETWEET_DELAY,
+        'all_tweets': USER_TWEET_COUNT_FOR_ROW,
     })
 
     # write output with main data for later analysis
-    with open(OUTPUT_FILE_ALimmi, 'a', newline='') as o_all:
+    with open(OUTPUT_FILE_ALL, 'a', newline='') as o_all:
         ALL_WRITER = csv.DictWriter(o_all, fieldnames=OUTPUT_FIELDS_ALL, delimiter=',')
         ALL_WRITER.writerow(output_for_row)
 
