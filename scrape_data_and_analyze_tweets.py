@@ -62,9 +62,9 @@ def remove_urls_from_text(text):
                   r'[a-zA-Z0-9]+\.[^\s]{2,})', '', text)
 
 def get_follower_and_tweet_count_for_user(username):
-    pdb.set_trace()
     followers_if_existing = USER_FOLLOWERS.get(username)
     if followers_if_existing != None:
+        print('Follower info was already retrieved.')
         return followers_if_existing
 
     # we need to scrape the information from twitter
@@ -78,7 +78,6 @@ def get_follower_and_tweet_count_for_user(username):
         raise UserInfoNotFoundException
 
     try:
-        pdb.set_trace()
         follower_count = twint.output.users_list[-1].followers
         tweet_count = twint.output.users_list[-1].tweets
         if not follower_count:
@@ -89,6 +88,32 @@ def get_follower_and_tweet_count_for_user(username):
     USER_FOLLOWERS[username] = (follower_count, tweet_count)
     return (follower_count, tweet_count)
 
+def scrape_all_user_information():
+    while user in USER_ACTIVITY.keys():
+        # we need to scrape the information from twitter
+        try:
+            conf = twint.Config()
+            conf.Username = user
+            conf.Store_object = True
+            twint.run.Lookup(conf)
+        except:
+            logging.fatal('Scraping of user data failed for %s.', username)
+            raise UserInfoNotFoundException
+        try:
+            follower_count = twint.output.users_list[-1].followers
+            tweet_count = twint.output.users_list[-1].tweets
+            if not follower_count:
+                raise UserInfoNotFoundException
+        except IndexError:
+            logging.fatal('Scraping for user data of %s returned empty list', username)
+            sys.exit(1)
+        try:
+            with open('users.csv', 'a', newline='') as users_file:
+                users_file.write(user + ',' + follower_count + ',' + tweet_count + ',' + USER_ACTIVITY.get(user) + '\n')
+            USER_ACTIVITY.pop('key', None)
+        except:
+            pass
+    
 
 def init_user_activity():
     for entry in ALL_TWEETS_DATA:
@@ -149,17 +174,20 @@ def get_retweet_delay_for_tweet(entry):
         conf.Store_object_tweets_list = retweets_of_row_tweet
         twint.run.Search(conf)
     except:
+        print('Retweets could not be found.')
         logging.fatal('Scraping of retweets failed for: %s', tweet_clean)
 
     minimal_date = ''
     minimal_time = ''
     if not retweets_of_row_tweet:
+        print('Retweets could not be found.')
         raise NoRetweetsFoundException
 
     for tweet in retweets_of_row_tweet:
         text = tweet.tweet.strip()
-        if not text.startswith('RT  @' + entry['screenname']):
+        if not text.startswith('RT  @' + entry['username']):
             # we did not find a retweet from the user that we are looking for
+            print('Retweets from wrong user only.')
             continue
         if minimal_date is None or minimal_date >= tweet['datestamp']:
             if minimal_time is None or minimal_time >= tweet['timestamp']:
@@ -167,6 +195,7 @@ def get_retweet_delay_for_tweet(entry):
                 minimal_date = tweet['datestamp']
     delay = convert_strs_to_time(minimal_date, minimal_time) - \
         convert_strs_to_time(entry['datestamp'], entry['timestamp'])
+    print(delay)
     return delay.total_seconds()
 
 # converts two strings into a single datetime object
@@ -199,8 +228,6 @@ OUTPUT_FILE_ALL = sys.argv[2]
 OUTPUT_FILE_TWEETS = sys.argv[3]
 
 logging.basicConfig(level=logging.DEBUG,
-                    filename='finalize_data.log',
-                    filemode='a',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 INPUT_FIELDNAMES = ['id',
@@ -256,80 +283,83 @@ print('Begin to aggregate user activities.')
 init_user_activity()
 print('Finished to aggregate user activities.')
 
-if RESUME_MODE:
-    ALL_TWEETS_DATA = ALL_TWEETS_DATA[RESUME_COUNTER+1:]
-    print('Resume from line %d.', RESUME_COUNTER+1)
-
-# process each tweet
-while ALL_TWEETS_DATA:
-    ROW = ALL_TWEETS_DATA.pop(0)
-    print('Starting to work on a new tweet.')
-    CURR_USER = ROW['username']
-
-    # a url is contained
-    if ROW['urls'].strip() != '':
-        URLS = 1
-    else:
-        URLS = 0
-
-    # a hashtag is contained
-    if ROW['hashtags'].strip() != '':
-        HASHTAGS = 1
-    else:
-        HASHTAGS = 0
-
-    try:
-        CLEANED_TWEET = clean_tweet(ROW['tweet'])
-    except TweetLanguageNotEnglishException:
-        logging.error('Tweet: %s was not detected as english.', ROW['tweet'])
-        continue
-
-    try:
-        USER_FOLLOWER_COUNT_FOR_ROW, USER_TWEET_COUNT_FOR_ROW = get_follower_and_tweet_count_for_user(CURR_USER)
-    except UserInfoNotFoundException:
-        logging.error('Follower Info for %s could not be scraped.', CURR_USER)
-        continue
-
-    try:
-        USER_ACTIVITY_COUNT_FOR_ROW = get_user_activity_for_user(CURR_USER)
-    except InvalidUserActivityException:
-        logging.fatal('Activity for user %s could not be retrieved!', CURR_USER)
-        # this indicates a problem on our side, we need to investigate!
-        sys.exit(1)
-
-    if int(ROW['retweets_count'].strip()) != 0:
-        try:
-            RETWEET_DELAY = get_retweet_delay_for_tweet(ROW)
-        except NoRetweetsFoundException:
-            logging.error('Retweets for %s could not be scraped.', ROW['tweet'])
-            continue
-    else:
-        # convention
-        RETWEET_DELAY = 0
-
-    output_for_row = ({
-        'orig_tweet': ROW['tweet'],
-        'clean_tweet': CLEANED_TWEET,
-        'hashtag': HASHTAGS,
-        'url': URLS,
-        'likes': ROW['likes_count'],
-        'retweets': ROW['retweets_count'],
-        'replies': ROW['replies_count'],
-        'followers': USER_FOLLOWER_COUNT_FOR_ROW,
-        'activity': USER_ACTIVITY_COUNT_FOR_ROW,
-        'timedelay': RETWEET_DELAY,
-        'all_tweets': USER_TWEET_COUNT_FOR_ROW,
-    })
-
-    # write output with main data for later analysis
-    with open(OUTPUT_FILE_ALL, 'a', newline='') as o_all:
-        ALL_WRITER = csv.DictWriter(o_all, fieldnames=OUTPUT_FIELDS_ALL, delimiter=',')
-        ALL_WRITER.writerow(output_for_row)
-
-    # write output with tweets to reuse in sentistrength
-    with open(OUTPUT_FILE_TWEETS, 'a', newline='') as o_tweets:
-        TWEETS_WRITER = csv.DictWriter(o_tweets, fieldnames=OUTPUT_FIELDS_TWEETS, delimiter=',')
-        TWEETS_WRITER.writerow({'tweet': output_for_row['clean_tweet']})
-
-o_all.close()
-o_tweets.close()
+print('Begin scraping user data')
+scrape_all_user_information()
+# if RESUME_MODE:
+#     ALL_TWEETS_DATA = ALL_TWEETS_DATA[RESUME_COUNTER+1:]
+#     print('Resume from line %d.', RESUME_COUNTER+1)
+# 
+# # process each tweet
+# while ALL_TWEETS_DATA:
+#     ROW = ALL_TWEETS_DATA.pop(0)
+#     CURR_USER = ROW['username']
+# 
+#     # a url is contained
+#     if ROW['urls'].strip() != '':
+#         URLS = 1
+#     else:
+#         URLS = 0
+# 
+#     # a hashtag is contained
+#     if ROW['hashtags'].strip() != '':
+#         HASHTAGS = 1
+#     else:
+#         HASHTAGS = 0
+# 
+#     try:
+#         CLEANED_TWEET = clean_tweet(ROW['tweet'])
+#     except TweetLanguageNotEnglishException:
+#         logging.error('Tweet: %s was not detected as english.', ROW['tweet'])
+#         print('Tweet discarded due to language.')
+#         continue
+# 
+#     try:
+#         USER_FOLLOWER_COUNT_FOR_ROW, USER_TWEET_COUNT_FOR_ROW = get_follower_and_tweet_count_for_user(CURR_USER)
+#     except UserInfoNotFoundException:
+#         logging.error('Follower Info for %s could not be scraped.', CURR_USER)
+#         continue
+# 
+#     try:
+#         USER_ACTIVITY_COUNT_FOR_ROW = get_user_activity_for_user(CURR_USER)
+#     except InvalidUserActivityException:
+#         logging.fatal('Activity for user %s could not be retrieved!', CURR_USER)
+#         # this indicates a problem on our side, we need to investigate!
+#         sys.exit(1)
+# 
+#     if int(ROW['retweets_count'].strip()) != 0:
+#         print('RETWEETET TWEET FOUND!!!')
+#         try:
+#             RETWEET_DELAY = get_retweet_delay_for_tweet(ROW)
+#         except NoRetweetsFoundException:
+#             logging.error('Retweets for %s could not be scraped.', ROW['tweet'])
+#             continue
+#     else:
+#         # convention
+#         RETWEET_DELAY = 0
+# 
+#     output_for_row = ({
+#         'orig_tweet': ROW['tweet'],
+#         'clean_tweet': CLEANED_TWEET,
+#         'hashtag': HASHTAGS,
+#         'url': URLS,
+#         'likes': ROW['likes_count'],
+#         'retweets': ROW['retweets_count'],
+#         'replies': ROW['replies_count'],
+#         'followers': USER_FOLLOWER_COUNT_FOR_ROW,
+#         'activity': USER_ACTIVITY_COUNT_FOR_ROW,
+#         'timedelay': RETWEET_DELAY,
+#         'all_tweets': USER_TWEET_COUNT_FOR_ROW,
+#     })
+# 
+#     # write output with main data for later analysis
+#     with open(OUTPUT_FILE_ALL, 'a', newline='') as o_all:
+#         ALL_WRITER = csv.DictWriter(o_all, fieldnames=OUTPUT_FIELDS_ALL, delimiter=',')
+#         ALL_WRITER.writerow(output_for_row)
+# 
+#     # write output with tweets to reuse in sentistrength
+#     with open(OUTPUT_FILE_TWEETS, 'a', newline='') as o_tweets:
+#         TWEETS_WRITER = csv.DictWriter(o_tweets, fieldnames=OUTPUT_FIELDS_TWEETS, delimiter=',')
+#         TWEETS_WRITER.writerow({'tweet': output_for_row['clean_tweet']})
+# 
+# o_all.close()
+# o_tweets.close()
