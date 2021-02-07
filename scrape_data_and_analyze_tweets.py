@@ -91,17 +91,50 @@ def get_follower_and_tweet_count_for_user(username):
 def scrape_all_user_information():
     with open('users.csv', 'a', newline='') as users_file:
         for user in USER_ACTIVITY.keys():
-            # we need to scrape the information from twitter
-            conf = twint.Config()
-            conf.Username = user
-            conf.Store_object = True
-            twint.output.users_list = []
-            twint.run.Lookup(conf)
-            follower_count = twint.output.users_list[-1].followers
-            tweet_count = twint.output.users_list[-1].tweets
-            line = str(user) + ',' + str(follower_count) + ',' + str(tweet_count) + ',' + str(USER_ACTIVITY.get(user)) + '\n'
-            users_file.write(line)
-    
+            try:
+                # we need to scrape the information from twitter
+                conf = twint.Config()
+                conf.Username = user
+                conf.Store_object = True
+                twint.output.users_list = []
+                twint.run.Lookup(conf)
+                follower_count = twint.output.users_list[-1].followers
+                tweet_count = twint.output.users_list[-1].tweets
+                line = str(user) + ',' + str(follower_count) + ',' + str(tweet_count) + ',' + str(USER_ACTIVITY.get(user)) + '\n'
+                users_file.write(line)
+            except (ValueError, KeyError):
+                users_file.write(str(user) + ',' + '#' + ',' + '#' + ',' + str(USER_ACTIVITY.get(user)) + '\n')
+
+def scrape_part_user_information():
+    usernames = []
+    with open('users_'+str(USERS_SLICE), 'r') as input_file:
+        line = input_file.readline()
+        while line:
+            usernames.append(line)
+            line = input_file.readline()
+
+    with open('users'+str(USERS_SLICE)+'.csv', 'a', newline='') as users_file:
+        for user in usernames:
+            try:
+                # we need to scrape the information from twitter
+                conf = twint.Config()
+                conf.Username = user.strip()
+                conf.Store_object = True
+                twint.output.users_list = []
+                twint.run.Lookup(conf)
+                follower_count = twint.output.users_list[-1].followers
+                tweet_count = twint.output.users_list[-1].tweets
+                line = str(user.strip()) + ',' + str(follower_count) + ',' + str(tweet_count) + ',' + str(USER_ACTIVITY.get(user.strip())) + '\n'
+                users_file.write(line)
+            except (ValueError, KeyError):
+                users_file.write(str(user.strip()) + ',' + '#' + ',' + '#' + ',' + str(USER_ACTIVITY.get(user.strip())) + '\n')
+
+def split_user_names():
+    keycount = 0
+    for user in USER_ACTIVITY.keys():
+        with open('users_'+str(keycount//100000), 'a', newline='') as file:
+            file.write(user+'\n')
+        keycount += 1
 
 def init_user_activity():
     for entry in ALL_TWEETS_DATA:
@@ -212,8 +245,9 @@ def queue_output_for_row(data):
 DetectorFactory.seed = 0
 
 INPUT_FILE = sys.argv[1]
-OUTPUT_FILE_ALL = sys.argv[2]
-OUTPUT_FILE_TWEETS = sys.argv[3]
+USERS_SLICE = sys.argv[2]
+# OUTPUT_FILE_ALL = sys.argv[2]
+# OUTPUT_FILE_TWEETS = sys.argv[3]
 
 # logging.basicConfig(level=logging.DEBUG,
 #                    format='%(asctime)s - %(levelname)s - %(message)s')
@@ -272,7 +306,8 @@ init_user_activity()
 print('Finished to aggregate user activities.')
 
 print('Begin scraping user data')
-scrape_all_user_information()
+scrape_part_user_information()
+#scrape_all_user_information()
 # if RESUME_MODE:
 #     ALL_TWEETS_DATA = ALL_TWEETS_DATA[RESUME_COUNTER+1:]
 #     print('Resume from line %d.', RESUME_COUNTER+1)
