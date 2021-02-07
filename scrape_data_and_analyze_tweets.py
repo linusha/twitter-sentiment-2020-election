@@ -89,30 +89,18 @@ def get_follower_and_tweet_count_for_user(username):
     return (follower_count, tweet_count)
 
 def scrape_all_user_information():
-    while user in USER_ACTIVITY.keys():
-        # we need to scrape the information from twitter
-        try:
+    with open('users.csv', 'a', newline='') as users_file:
+        for user in USER_ACTIVITY.keys():
+            # we need to scrape the information from twitter
             conf = twint.Config()
             conf.Username = user
             conf.Store_object = True
+            twint.output.users_list = []
             twint.run.Lookup(conf)
-        except:
-            logging.fatal('Scraping of user data failed for %s.', username)
-            raise UserInfoNotFoundException
-        try:
             follower_count = twint.output.users_list[-1].followers
             tweet_count = twint.output.users_list[-1].tweets
-            if not follower_count:
-                raise UserInfoNotFoundException
-        except IndexError:
-            logging.fatal('Scraping for user data of %s returned empty list', username)
-            sys.exit(1)
-        try:
-            with open('users.csv', 'a', newline='') as users_file:
-                users_file.write(user + ',' + follower_count + ',' + tweet_count + ',' + USER_ACTIVITY.get(user) + '\n')
-            USER_ACTIVITY.pop('key', None)
-        except:
-            pass
+            line = str(user) + ',' + str(follower_count) + ',' + str(tweet_count) + ',' + str(USER_ACTIVITY.get(user)) + '\n'
+            users_file.write(line)
     
 
 def init_user_activity():
@@ -227,8 +215,8 @@ INPUT_FILE = sys.argv[1]
 OUTPUT_FILE_ALL = sys.argv[2]
 OUTPUT_FILE_TWEETS = sys.argv[3]
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+# logging.basicConfig(level=logging.DEBUG,
+#                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 INPUT_FIELDNAMES = ['id',
                     'conversation_id',
