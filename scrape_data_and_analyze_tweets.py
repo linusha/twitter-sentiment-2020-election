@@ -11,11 +11,6 @@ from nltk.tokenize import TweetTokenizer
 from nltk.stem import PorterStemmer
 
 print('Script started.')
-if (len(sys.argv) == 5):
-    RESUME_MODE = True
-    RESUME_COUNTER = sys.argv[5]
-else:
-    RESUME_MODE = False
 
 USER_ACTIVITY = {}
 OUTPUT_FIELDS_ALL = ['hashtag',
