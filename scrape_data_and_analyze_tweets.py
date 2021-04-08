@@ -160,13 +160,13 @@ while ALL_TWEETS_DATA:
     CURR_USER = ROW['username']
 
     # a url is contained
-    if ROW['urls'].strip() != '':
+    if ROW['urls'].strip() != '[]':
         URLS = 1
     else:
         URLS = 0
 
     # a hashtag is contained
-    if ROW['hashtags'].strip() != '':
+    if ROW['hashtags'].strip() != '[]':
         HASHTAGS = 1
     else:
         HASHTAGS = 0
