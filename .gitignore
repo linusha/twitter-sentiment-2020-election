@@ -2,3 +2,4 @@
 /data/*
 *.log
 tweet_counts
+.Rproj.user
