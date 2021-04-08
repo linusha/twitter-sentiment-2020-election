@@ -53,7 +53,7 @@ def remove_emoji_from_text(text):
         u"\U0001F680-\U0001F6FF"  # transport & map symbols
         u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
                            "]+", flags = re.UNICODE)
-    return regrex_pattern.sub(r'',text)
+    return regex.sub(r'',text)
     
 def init_user_activity():
     for entry in ALL_TWEETS_DATA:
