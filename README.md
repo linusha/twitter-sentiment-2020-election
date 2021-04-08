@@ -1,15 +1,17 @@
 # twitter-sentiment-2020-election
 
-# process
+This repository contains code and data used for a conceptual replication of "Emotions and Information Diffusion in Social Media - Sentiment of Microblogs and Sharing Behavior" (Stieglitz, Dang-Xuan. 2013).
 
-## collecting data
+All code is under MIT license. Please note that all data herein, figures and texts that are part of the data analysis are extempt to this.
 
-The queries contained in the corresponding file in this repository were run using `twint` in version XYZ
+## Process
 
-1. Run `filter_tweets.py` for all files.
+### Collecting data
+
+The queries contained in the corresponding file in this repository were run using `twint` in version 2.1.22.
+
+1. Run `filter__and_clean_tweets.py` for all files.
 2. Remove duplicate tweets and merge all tweets in a single `.csv` file
-3. Enrich tweets with additional data that needs to get scraped
-4. analyze sentiment of all tweets
 
 ## `filter_and_clean_tweets.py`
 
@@ -38,8 +40,6 @@ To run the script cleaning.log must exist. The script will convert from a `tab` 
 ## remove duplicate tweets 
 
 `awk '!a[$0]++' *.csv.clean > deduplicated_tweets.csv.clean`
-
-## enrich data and prepare for analysis
 
 
 
