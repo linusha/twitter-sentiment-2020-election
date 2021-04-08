@@ -1,4 +1,4 @@
 /SentiStrength/*
 /data/*
-
+*.log
 tweet_counts
