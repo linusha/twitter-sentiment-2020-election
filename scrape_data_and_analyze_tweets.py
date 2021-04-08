@@ -18,8 +18,6 @@ OUTPUT_FIELDS_ALL = ['hashtag',
                      'activity',
                     ]
 ALL_TWEETS_DATA = []
-OUTPUT_DATA_TWEETS = []
-OUTPUT_DATA_ALL = []
 TRANSLATE_TABLE = dict((ord(char), None) for char in string.punctuation)
 
 #######################################################################
@@ -98,10 +96,6 @@ def preprocess_tweet(tweet):
         tweet_preprocesesed.append(stemmed_token)
     tweet_preprocesesed = ' '.join(tweet_preprocesesed)
     return tweet_preprocesesed
-
-def queue_output_for_row(data):
-    OUTPUT_DATA_ALL.append({'tweet': data['clean_tweet']})
-    OUTPUT_DATA_ALL.append(data)
 
 #######################################################################
 ############################# MAIN SCRIPT #############################
