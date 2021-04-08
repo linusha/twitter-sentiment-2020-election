@@ -4,9 +4,7 @@ import datetime
 import logging
 import re
 import string
-import pdb
-import twint
-from langdetect import DetectorFactory, detect
+import pdb # TODO: remove
 from nltk.tokenize import TweetTokenizer
 from nltk.stem import PorterStemmer
 
@@ -19,7 +17,6 @@ OUTPUT_FIELDS_ALL = ['hashtag',
                      'retweets',
                      'replies',
                      'activity',
-                     'timedelay'
                     ]
 ALL_TWEETS_DATA = []
 OUTPUT_DATA_TWEETS = []
@@ -89,8 +86,6 @@ def clean_tweet(tweet):
         stemmed_token = stmmr.stem(token)
         tweet_cleaned.append(stemmed_token)
     tweet_cleaned = ' '.join(tweet_cleaned)
-    if detect(tweet_cleaned) != 'en':
-        raise TweetLanguageNotEnglishException
     return tweet_cleaned
 
 def queue_output_for_row(data):
@@ -100,11 +95,6 @@ def queue_output_for_row(data):
 #######################################################################
 ############################# MAIN SCRIPT #############################
 #######################################################################
-
-# Language detection algorithm is non-deterministic,
-# which means that if you try to run it on a text which is either too short or too ambiguous,
-# you might get different results everytime you run it.
-DetectorFactory.seed = 0
 
 INPUT_FILE = sys.argv[1]
 OUTPUT_FILE_DATA = sys.argv[2]
@@ -158,13 +148,12 @@ with open(INPUT_FILE, 'r', newline='') as i:
             }
         )
     i.close()
-print('Read data from input file. Read %d entries.', len(ALL_TWEETS_DATA))
+print('Read data from input file. Read ' + str(len(ALL_TWEETS_DATA)) + ' entries.')
 
 print('Begin to aggregate user activities.')
 init_user_activity()
 print('Finished to aggregate user activities.')
 
-print('Begin scraping user data')
 # process each tweet
 while ALL_TWEETS_DATA:
     ROW = ALL_TWEETS_DATA.pop(0)
@@ -182,12 +171,7 @@ while ALL_TWEETS_DATA:
     else:
         HASHTAGS = 0
 
-    try:
-        CLEANED_TWEET = clean_tweet(ROW['tweet'])
-    except TweetLanguageNotEnglishException:
-        logging.error('Tweet: %s was not detected as english.', ROW['tweet'])
-        print('Tweet discarded due to language.')
-        continue
+    CLEANED_TWEET = clean_tweet(ROW['tweet'])
 
     try:
         USER_ACTIVITY_COUNT_FOR_ROW = get_user_activity_for_user(CURR_USER)
@@ -196,33 +180,37 @@ while ALL_TWEETS_DATA:
         # this indicates a problem on our side, we need to investigate!
         sys.exit(1)
 
-    output_for_row = ({
-        'orig_tweet': ROW['tweet'],
-        'clean_tweet': CLEANED_TWEET,
+    data_for_row = ({
         'hashtag': HASHTAGS,
         'url': URLS,
         'likes': ROW['likes_count'],
         'retweets': ROW['retweets_count'],
         'replies': ROW['replies_count'],
-        'followers': USER_FOLLOWER_COUNT_FOR_ROW,
         'activity': USER_ACTIVITY_COUNT_FOR_ROW,
-        'timedelay': RETWEET_DELAY,
-        'all_tweets': USER_TWEET_COUNT_FOR_ROW,
+    })
+
+    original_tweet_for_row = ({
+        'orig_tweet': ROW['tweet'],
+    })
+
+    cleaned_tweet_for_row = ({
+       'clean_tweet': CLEANED_TWEET,
     })
 
     # write output with all data except tweet
-    with open(OUTPUT_FILE_ALL, 'a', newline='') as o_all:
-        ALL_WRITER = csv.DictWriter(o_all, fieldnames=OUTPUT_FIELDS_ALL, delimiter=',')
-        ALL_WRITER.writerow(output_for_row)
+    with open(OUTPUT_FILE_DATA, 'a', newline='') as o_data:
+        DATA_WRITER = csv.DictWriter(o_data, fieldnames=OUTPUT_FIELDS_ALL, delimiter=',')
+        DATA_WRITER.writerow(data_for_row)
 
     # write output with tweets in same order as the other data
-    with open(OUTPUT_FILE_TWEETS_ORIG, 'a', newline='') as o_tweets:
-        TWEETS_WRITER = csv.DictWriter(o_tweets, fieldnames=['tweet'], delimiter=',')
-        TWEETS_WRITER.writerow({'tweet': output_for_row['tweet']})
+    with open(OUTPUT_FILE_TWEETS_ORIG, 'a', newline='') as o_orig_tweets:
+        TWEETS_WRITER = csv.DictWriter(o_orig_tweets, fieldnames=['orig_tweet'], delimiter=',')
+        TWEETS_WRITER.writerow(original_tweet_for_row)
 
-    with open(OUTPUT_FILE_TWEETS_CLEAN, 'a', newline='') as o_tweets:
-        TWEETS_WRITER = csv.DictWriter(o_tweets, fieldnames=['tweet'], delimiter=',')
-        TWEETS_WRITER.writerow({'tweet': output_for_row['clean_tweet']})
+    with open(OUTPUT_FILE_TWEETS_CLEAN, 'a', newline='') as o_clean_tweets:
+        TWEETS_WRITER = csv.DictWriter(o_clean_tweets, fieldnames=['clean_tweet'], delimiter=',')
+        TWEETS_WRITER.writerow(cleaned_tweet_for_row)
 
-o_all.close()
-o_tweets.close()
+o_data.close()
+o_orig_tweets.close()
+o_clean_tweets.close()
