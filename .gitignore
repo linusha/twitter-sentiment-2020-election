@@ -6,3 +6,4 @@ tweet_counts
 /results/*
 *.tar
 *.html
+*.Rproj
