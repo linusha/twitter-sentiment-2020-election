@@ -3,3 +3,5 @@
 *.log
 tweet_counts
 .Rproj.user
+/results/*
+*.tar

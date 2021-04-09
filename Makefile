@@ -19,12 +19,10 @@ results: senti
 	mv data.csv results/data.csv
 	mv clean_tweets.csv results/clean_tweets.csv 
 	mv orig_tweets.csv results/orig_tweets.csv
-	mv data.csv results/data.csv
-	mv preprocessed_tweets.csv results/preprocessed_tweets_sentimentq.csv
-	mv no_emojis_tweets.csv results/no_emojis_tweets_sentiment.csv
+	mv preprocessed_tweets.csv results/preprocessed_tweets.csv
+	mv no_emojis_tweets.csv results/no_emojis_tweets.csv
 	mv clean_tweets_sentiment.csv results/clean_tweets_sentiment.csv 
 	mv orig_tweets_sentiment.csv results/orig_tweets_sentiment.csv
-	mv data_sentiment.csv results/data_sentiment.csv
 	mv preprocessed_tweets_sentiment.csv results/preprocessed_tweets_sentiment.csv
 	mv no_emojis_tweets_sentiment.csv results/no_emojis_tweets_sentiment.csv
 
