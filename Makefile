@@ -1,7 +1,8 @@
 
-FILES = clean_tweets.csv orig_tweets.csv data.csv preprocessed_tweets.csv no_emojis_tweets.csv
+DATA = data.csv
+TWEETS = clean_tweets.csv orig_tweets.csv preprocessed_tweets.csv no_emojis_tweets.csv
 
-backup: $(FILES) 
+backup: $(FILES) $(DATA)
 	cp clean_tweets.csv clean_tweets.csv.bak
 	cp orig_tweets.csv orig_tweets.csv.bak
 	cp data.csv data.csv.bak
@@ -10,6 +11,11 @@ backup: $(FILES)
 	tar -cf $(shell date +%s).tar data.csv.bak orig_tweets.csv.bak clean_tweets.csv.bak preprocessed_tweets.csv.bak no_emojis_tweets.csv.bak
 	rm data.csv.bak orig_tweets.csv.bak clean_tweets.csv.bak preprocessed_tweets.csv.bak no_emojis_tweets.csv.bak
 
+sentiment: $(TWEETS)
+	java -jar ./SentiStrength/SentiStrengthCom.jar sentidata ./SentiStrength/SentiStrength_Data/ input orig_tweets.csv
+	java -jar ./SentiStrength/SentiStrengthCom.jar sentidata ./SentiStrength/SentiStrength_Data/ input clean_tweets.csv
+	java -jar ./SentiStrength/SentiStrengthCom.jar sentidata ./SentiStrength/SentiStrength_Data/ input preprocessed_tweets.csv
+	java -jar ./SentiStrength/SentiStrengthCom.jar sentidata ./SentiStrength/SentiStrength_Data/ input no_emojis_tweets.csv
 
 .PHONY: clean process_tweets
 
