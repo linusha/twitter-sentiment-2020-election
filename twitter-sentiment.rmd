@@ -6,5 +6,84 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(here)
 library(MASS)
 ```
+```{r reading input}
+# data
+data <- read.csv(here("results", "data.csv"), header = FALSE)
+names(data) <- c("hashtags", "url", "likes", "retweets", "replies", "user_activity")
+
+# tweets without further processing
+original_tweets <- read.csv(here("results", "orig_tweets.csv"), header = FALSE)
+names(original_tweets) <- c("original_tweet")
+original_tweets_sentiment <- read.csv(here("results", "orig_tweets_sentiment.csv"), header = FALSE)
+names(original_tweets_sentiment) <- c("ot_positiveScore", "ot_negativeScore", "ot_polarity", "ot_sentiment", "ot_isNegative", "ot_interactionTerm")
+
+# tweets without #, urls, e-mails
+clean_tweets <- read.csv(here("results", "clean_tweets.csv"), header = FALSE)
+names(clean_tweets) <- c("clean_tweet")
+clean_tweets_sentiment <- read.csv(here("results", "clean_tweets_sentiment.csv"), header = FALSE)
+names(clean_tweets_sentiment) <- c("ct_positiveScore", "ct_negativeScore", "ct_polarity", "ct_sentiment", "ct_isNegative", "ct_interactionTerm")
+
+# cleaned tweets that were stemmed using porter stemmer
+pp_tweets <- read.csv(here("results", "preprocessed_tweets.csv"), header = FALSE)
+names(pp_tweets) <- c("pp_tweet")
+pp_tweets_sentiment <- read.csv(here("results", "preprocessed_tweets_sentiment.csv"), header = FALSE)
+names(pp_tweets_sentiment) <- c("pp_positiveScore", "pp_negativeScore", "pp_polarity", "pp_sentiment", "pp_isNegative", "pp_interactionTerm")
+
+# cleaned tweets were emojis were removed
+ne_tweets <- read.csv(here("results", "no_emojis_tweets.csv"), header = FALSE)
+names(ne_tweets) <- c("ne_tweet")
+ne_tweets_sentiment <- read.csv(here("results", "no_emojis_tweets_sentiment.csv"), header = FALSE)
+names(ne_tweets_sentiment) <- c("ne_positiveScore", "ne_negativeScore", "ne_polarity", "ne_sentiment", "ne_isNegative", "ne_interactionTerm")
+```
+
+```{r constructing df}
+all_data <- cbind(data, original_tweets, clean_tweets, pp_tweets, ne_tweets, original_tweets_sentiment, clean_tweets_sentiment, pp_tweets_sentiment, ne_tweets_sentiment)
+# remove partial dataframes from env
+rm("clean_tweets")
+rm("clean_tweets_sentiment")
+rm("ne_tweets")
+rm("ne_tweets_sentiment")
+rm("pp_tweets")
+rm("pp_tweets_sentiment")
+rm("original_tweets")
+rm("original_tweets_sentiment")
+rm("data")
+
+all_data$log_user_activity <- log(all_data$user_activity)
+```
+
+```{r regression models H1}
+nbr_original_tweets <- glm.nb(retweets ~ hashtags + url + log_user_activity + ot_sentiment, data = all_data)
+summary(nbr_original_tweets)
+rm("nbr_original_tweets")
+nbr_clean_tweets <- glm.nb(retweets ~ hashtags + url + log_user_activity + ct_sentiment, data = all_data)
+summary(nbr_clean_tweets)
+rm("nbr_clean_tweets")
+nbr_preprocessed_tweets <- glm.nb(retweets ~ hashtags + url + log_user_activity + pp_sentiment, data = all_data)
+summary(nbr_preprocessed_tweets)
+rm("nbr_preprocessed_tweets")
+nbr_no_emojis_tweets <- glm.nb(retweets ~ hashtags + url + log_user_activity + ne_sentiment, data = all_data)
+summary(nbr_no_emojis_tweets)
+rm("nbr_no_emojis_tweets")
+```
+
+```{r regression models H3a}
+nbr_original_tweets <- glm.nb(retweets ~ sentiment + ot_isNegative + log_user_activity + hashtags + url + ot_interactionTerm, data = all_data)
+summary(nbr_original_tweets)
+rm("nbr_original_tweets")
+nbr_clean_tweets <- glm.nb(retweets ~ sentiment + ct_isNegative + log_user_activity + hashtags + url + ct_interactionTerm, data = all_data)
+summary(nbr_clean_tweets)
+rm("nbr_clean_tweets")
+nbr_preprocessed_tweets <- glm.nb(retweets ~ sentiment + pp_isNegative + log_user_activity + hashtags + url + pp_interactionTerm, data = all_data)
+summary(nbr_preprocessed_tweets)
+rm("nbr_preprocessed_tweets")
+nbr_no_emojis_tweets <- glm.nb(retweets ~ sentiment + ne_isNegative + log_user_activity + hashtags + url + ne_interactionTerm, data = all_data)
+summary(nbr_no_emojis_tweets)
+rm("nbr_no_emojis_tweets")
+```
+
+
+
