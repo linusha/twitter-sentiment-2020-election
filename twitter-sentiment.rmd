@@ -56,7 +56,7 @@ all_data$log_user_activity <- log(all_data$user_activity)
 ```
 
 ```{r regression models H1}
-nbr_original_tweets <- glm.nb(retweets ~ hashtags + url + log_user_activity + ot_sentiment, data = all_data)
+nbr_original_tweets <- glm.nb(retweets ~ hashtags + url + log_user_activity + exp(ot_sentiment), data = all_data)
 summary(nbr_original_tweets)
 rm("nbr_original_tweets")
 nbr_clean_tweets <- glm.nb(retweets ~ hashtags + url + log_user_activity + ct_sentiment, data = all_data)
@@ -71,16 +71,16 @@ rm("nbr_no_emojis_tweets")
 ```
 
 ```{r regression models H3a}
-nbr_original_tweets <- glm.nb(retweets ~ sentiment + ot_isNegative + log_user_activity + hashtags + url + ot_interactionTerm, data = all_data)
+nbr_original_tweets <- glm.nb(retweets ~ ot_sentiment + ot_isNegative + log_user_activity + hashtags + url + ot_interactionTerm, data = all_data)
 summary(nbr_original_tweets)
 rm("nbr_original_tweets")
-nbr_clean_tweets <- glm.nb(retweets ~ sentiment + ct_isNegative + log_user_activity + hashtags + url + ct_interactionTerm, data = all_data)
+nbr_clean_tweets <- glm.nb(retweets ~ ct_sentiment + ct_isNegative + log_user_activity + hashtags + url + ct_interactionTerm, data = all_data)
 summary(nbr_clean_tweets)
 rm("nbr_clean_tweets")
-nbr_preprocessed_tweets <- glm.nb(retweets ~ sentiment + pp_isNegative + log_user_activity + hashtags + url + pp_interactionTerm, data = all_data)
+nbr_preprocessed_tweets <- glm.nb(retweets ~ pp_sentiment + pp_isNegative + log_user_activity + hashtags + url + pp_interactionTerm, data = all_data)
 summary(nbr_preprocessed_tweets)
 rm("nbr_preprocessed_tweets")
-nbr_no_emojis_tweets <- glm.nb(retweets ~ sentiment + ne_isNegative + log_user_activity + hashtags + url + ne_interactionTerm, data = all_data)
+nbr_no_emojis_tweets <- glm.nb(retweets ~ ne_sentiment + ne_isNegative + log_user_activity + hashtags + url + ne_interactionTerm, data = all_data)
 summary(nbr_no_emojis_tweets)
 rm("nbr_no_emojis_tweets")
 ```
