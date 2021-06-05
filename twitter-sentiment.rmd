@@ -62,6 +62,13 @@ liwc_data <- liwc_data[,-c(1:36)]
 write.csv(liwc_data, 'liwc_results.csv')
 ```
 
+```{r merge all data}
+liwc <- read.csv('liwc_results.csv')
+all_data_liwc <- cbind(all_data, liwc)
+write.csv(all_data_liwc, 'complete_data.csv')
+```
+
+
 ```{r regression models H1}
 nbr_original_tweets <- glm.nb(retweets ~ hashtags + url + log_user_activity + exp(ot_sentiment), data = all_data)
 summary(nbr_original_tweets)
