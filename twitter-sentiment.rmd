@@ -55,6 +55,13 @@ rm("data")
 all_data$log_user_activity <- log(all_data$user_activity)
 ```
 
+```{r}
+# this data was exported to csv and the original tweet was analyzed using LIWC2015
+liwc_data <- read.csv('LIWC2015_results.csv')
+liwc_data <- liwc_data[,-c(1:36)]
+write.csv(liwc_data, 'liwc_results.csv')
+```
+
 ```{r regression models H1}
 nbr_original_tweets <- glm.nb(retweets ~ hashtags + url + log_user_activity + exp(ot_sentiment), data = all_data)
 summary(nbr_original_tweets)
