@@ -1,0 +1,128 @@
+---
+title: "Tweet Analysis"
+author: "Linus Hagemann"
+date: "June 5, 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(stargazer)
+library(MASS)
+tweet_data <- read.csv('complete_data.csv')
+```
+
+Starting point: All original tweets that were made containing specified keywords (Biden, Trump, US Election,...) on election day (Nov 03 2020) in mainland US. This means comments on other tweets and retweets are not part of the data set.
+
+```{r}
+length((tweet_data$likes[tweet_data$likes == 0]))
+```
+
+Half of all tweets did not get any likes.
+
+```{r}
+length((tweet_data$likes[tweet_data$retweets == 0]))
+```
+
+Even more drastic - only around 400k tweets were retweetet.
+
+Introduce dummy variables for both:
+
+```{r}
+tweet_data$liked <- ifelse(tweet_data$likes != 0, TRUE, FALSE)
+tweet_data$retweeted <- ifelse(tweet_data$retweets != 0, TRUE, FALSE)
+# for comments as  well
+tweet_data$repliedTo <- ifelse(tweet_data$replies != 0, TRUE, FALSE)
+table(tweet_data$repliedTo)
+```
+
+We introduce one last dummy variable which captures if there was any form of engagement with the tweet at all. Therefore, dummy is TRUE if the tweet was either at least replied to, retweeted or liked. We also take the sum of replies, retweets and likes a tweet gathered and add these up to an *engagement score*.
+
+```{r}
+tweet_data$engagement <- tweet_data$replies + tweet_data$retweets + tweet_data$likes
+tweet_data$engaged <- ifelse(
+  (tweet_data$repliedTo + tweet_data$retweeted + tweet_data$liked) > 0,
+  TRUE,
+  FALSE
+  )
+```
+
+# Target: Did engagement happen at all?
+
+```{r include=FALSE}
+# cor.test(x, y, method=c("pearson", "kendall", "spearman"))
+```
+
+The interactionTerm is defined as sentiment multiplied by negative sentiment where sentiment is defined as $sentiment = (positive - negative) - 2$.
+Polarity is defined as $poarity = positive + negative$. These are based on the SentiStrength Analysis described in Stieglitz 2013.
+Logistic regression as the target is 1/0 classification (either interaction took place or not).
+
+## Other used features:
+
+url - was at least one URL contained in the original tweet?
+hashtags - was at least one hashtag used?
+positiveScore - the positive sentiment score of SentiStrength (0 to 5)
+negativeScore - the negative sentiment score of SentiStrength (0 to 5)
+posemo - positive sentiment score according to LIWC
+negemo - negative sentiment score according to LIWC
+anx - anxiety (LIWC)
+anger (LIWC)
+sad (LIWC)
+i speak (LIWC)
+we speak (LIWC) / we, they
+
+All Sentiment Scores are based on the original tweet texts.
+
+## Other available features
+
+- SentiStrength Scores for preprocessed tweets 
+  - with urls, emails,... removed
+  - above + stemmed using porter stemmer
+  - abote + removal of emojis
+- everything else that is mentioned in the LIWC data manual (all for the original tweet texts)
+
+```{r}
+stargazer(glm(engaged ~ hashtags + url + ot_polarity + ot_interactionTerm,
+    data = tweet_data,
+    family = binomial(link = 'logit')), type = 'text')
+stargazer(glm(engaged ~ hashtags + url + ot_positiveScore + ot_negativeScore + ot_interactionTerm,
+    data = tweet_data,
+    family = binomial(link = 'logit')), type = 'text')
+stargazer(glm(engaged ~ hashtags + url + ot_positiveScore + ot_interactionTerm,
+    data = tweet_data,
+    family = binomial(link = 'logit')), type = 'text')
+stargazer(glm(engaged ~ hashtags + url + ot_negativeScore + ot_interactionTerm,
+    data = tweet_data,
+    family = binomial(link = 'logit')), type = 'text')
+stargazer(glm(engaged ~ hashtags + url + posemo + negemo + anx + anger + sad,
+    data = tweet_data,
+    family = binomial(link = 'logit')), type = 'text')
+stargazer(glm(engaged ~ hashtags + url + WC,
+    data = tweet_data,
+    family = binomial(link = 'logit')), type = 'text')
+stargazer(glm(engaged ~ hashtags + url + i + we + they,
+    data = tweet_data,
+    family = binomial(link = 'logit')), type = 'text')
+```
+
+# Modelling the count of interactions
+
+Using a negative binomial regression as our dependent variable is a count.
+
+```{r}
+summary(glm.nb(engagement ~ hashtags + url + ot_polarity + ot_interactionTerm,
+               data = tweet_data))
+summary(glm.nb(engagement ~ hashtags + url + ot_positiveScore + ot_negativeScore + ot_interactionTerm,
+               data = tweet_data))
+summary(glm.nb(engagement ~ hashtags + url + ot_positiveScore + ot_interactionTerm,
+               data = tweet_data))
+summary(glm.nb(engagement ~ hashtags + url + ot_negativeScore + ot_interactionTerm,
+               data = tweet_data))
+summary(glm.nb(engagement ~ hashtags + url + posemo + negemo + anx + anger + sad,
+               data = tweet_data))
+summary(glm.nb(engagement ~ hashtags + url + WC,
+               data = tweet_data))
+summary(glm.nb(engagement ~ hashtags + url + i + we + they,
+               data = tweet_data))
+```
+
