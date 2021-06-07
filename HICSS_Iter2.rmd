@@ -13,11 +13,13 @@ library(stringr)
 ```
 
 ```{r}
+# TODO: exchange liwc cols with the ones for the clean tweets
 tweet_data <- read.csv('complete_data.csv')
 ```
 
-We will work with the variable `clean_tweet` from the data I scraped. The following preprocessing has occured on that:
+We will work with the sentiment scores of the `clean_tweet`s I scraped. The following preprocessing has occured on that:
 
+- Beginning with the original tweet
 - content of the tweet has been converted to lower case
 - all urls, hashtags (#) and e-mail adresses has been removed
 - the actual words of the hashtags have been preserved (e.g. *#Biden* now reads *biden*).
@@ -66,7 +68,7 @@ tweet_data$charLength <- lapply(tweet_data$original_tweet, nchar)
 
 ## Positive Interaction Term
 
-From the code that was initially thought to be used to replicate Stieglity, we already have an interaction term in our data.
+From the code that was initially thought to be used to replicate Stieglitz, we already have an interaction term in our data.
 It is defined to be $negative \times sentiment$.
 
 Rename it to avoid confusion and create the positive interaction term as well:
@@ -86,7 +88,12 @@ hist(tweet_data[tweet_data$likes>0])
 
 # Modelling
 
+Here is a list of all features used in the following modelling:
+
+
 ## Modelling Binary Targets
+
+Using logistic regression.
 
 ### Commented
 
@@ -108,55 +115,10 @@ stargazer(glm(repliedTo ~ hashtags + hashtagCount +
 
 ## Modelling Count Targets
 
-
-# Target: Did engagement happen at all?
-
-```{r include=FALSE}
-# cor.test(x, y, method=c("pearson", "kendall", "spearman"))
-```
-
-The interactionTerm is defined as sentiment multiplied by negative sentiment where sentiment is defined as $sentiment = (positive - negative) - 2$.
-Polarity is defined as $poarity = positive + negative$. These are based on the SentiStrength Analysis described in Stieglitz 2013.
-Logistic regression as the target is 1/0 classification (either interaction took place or not).
-
-## Other used features:
-
-url - was at least one URL contained in the original tweet?
-hashtags - was at least one hashtag used?
-positiveScore - the positive sentiment score of SentiStrength (0 to 5)
-negativeScore - the negative sentiment score of SentiStrength (0 to 5)
-posemo - positive sentiment score according to LIWC
-negemo - negative sentiment score according to LIWC
-anx - anxiety (LIWC)
-anger (LIWC)
-sad (LIWC)
-i speak (LIWC)
-we speak (LIWC) / we, they
-
-All Sentiment Scores are based on the original tweet texts.
-
-## Other available features
-
-- SentiStrength Scores for preprocessed tweets 
-  - with urls, emails,... removed
-  - above + stemmed using porter stemmer
-  - abote + removal of emojis
-- everything else that is mentioned in the LIWC data manual (all for the original tweet texts)
-
-
-
-```{r}
-# modelling separately for comments, likes and replies each
-stargazer(glm(engaged ~ hashtags + url + ot_polarity + ot_interactionTerm,
-    data = tweet_data,
-    family = binomial(link = 'logit')), type = 'text')
-```
-
-# Modelling the count of interactions
-
 Using a negative binomial regression as our dependent variable is a count.
 
-```{r}
-summary(glm.nb(engagement ~ hashtags + url + i + we + they,
-               data = tweet_data))
-```
+### Comments
+
+### Likes
+
+### Retweets
