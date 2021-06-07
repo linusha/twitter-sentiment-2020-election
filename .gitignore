@@ -15,3 +15,5 @@ complete_data.csv
 .RData
 
 .Rhistory
+
+clean_tweets.csv
