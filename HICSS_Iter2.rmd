@@ -92,6 +92,28 @@ hist(tweet_data[tweet_data$likes>0])
 
 Here is a list of all features used in the following modelling:
 
+|           Name          |                                Description                               |          Comment         |
+|:-----------------------:|:------------------------------------------------------------------------:|:------------------------:|
+|        retweeted        |                                TRUE/FALSE                                |                          |
+|         retweets        |                            Number of Retweets                            |                          |
+|        repliedTo        |                                TRUE/FALSE                                |                          |
+|         replies         |                             Number of Replies                            |                          |
+|          liked          |                                TRUE/FALSE                                |                          |
+|          likes          |                              Number of Likes                             |                          |
+|         hashtags        |                                TRUE/FALSE                                |                          |
+|       hashtagCount      |                        Number of Hashtags in Tweet                       |                          |
+|           url           |                                TRUE/FALSE                                |                          |
+|            WC           |              Length of tweet as it appeared online in words              |           LIWC           |
+|        charLength       |            Length of tweet as it appeared online in characters           |                          |
+| ct_negative_interaction |      Based on SentiStrength, ((positive - negative) - 2) * negative      | SentiStrenght, Stieglitz |
+| ct_positive_interaction |      Based on SentiStrength, ((positive - positive) - 2) * positive      | SentiStrenght, Stieglitz |
+|     ct_negativeScore    |                                                                          |       SentiStrength      |
+|     ct_positiveScore    |                                                                          |       SentiStrength      |
+|            i            |                                                                          |           LIWC           |
+|            we           |                                                                          |           LIWC           |
+|           they          |                                                                          |           LIWC           |
+|      user_activity      | Amount of tweets user made in the timeframe in which we collected tweets |  also done by Stieglitz  |
+
 
 ## Modelling Binary Targets
 
