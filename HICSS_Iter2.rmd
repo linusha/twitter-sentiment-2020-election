@@ -1,0 +1,162 @@
+---
+title: "HICSS Iteration 2"
+author: "Linus Hagemann"
+date: "June 7, 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(stargazer)
+library(MASS)
+library(stringr)
+```
+
+```{r}
+tweet_data <- read.csv('complete_data.csv')
+```
+
+We will work with the variable `clean_tweet` from the data I scraped. The following preprocessing has occured on that:
+
+- content of the tweet has been converted to lower case
+- all urls, hashtags (#) and e-mail adresses has been removed
+- the actual words of the hashtags have been preserved (e.g. *#Biden* now reads *biden*).
+
+Since we use this variable all SentiStrength Variables that we use going further have been prefixed with `ct_` for 'clean tweets'.
+
+# Creation of new Features
+
+We create new dummy features whether a tweet was:
+
+- replied to
+- commented on
+- liked.
+
+The numerical counts are already available as parts of the scraped data.
+
+```{r}
+tweet_data$liked <- ifelse(tweet_data$likes != 0, TRUE, FALSE)
+tweet_data$retweeted <- ifelse(tweet_data$retweets != 0, TRUE, FALSE)
+tweet_data$repliedTo <- ifelse(tweet_data$replies != 0, TRUE, FALSE)
+# keep the "salad" dummy, just because I am interested whether one can read more from it
+# when comparing to the new models
+tweet_data$engaged <- ifelse(
+  (tweet_data$repliedTo + tweet_data$retweeted + tweet_data$liked) > 0,
+  TRUE,
+  FALSE
+  )
+```
+
+## Count of Present Hashtags in a Tweet
+
+```{r}
+# we just assume the number of # to be equal to the number of hashtags
+# is just a heuristic, but with only 280 character/tweet and over 3 million tweets
+# this should be reasonable in grand scheme of things
+# we need to base this on the original tweet, since otherwise the # are already removed
+tweet_data$hashtagCount <- lapply(tweet_data$original_tweet, stringr::str_count, pattern = '#')
+```
+
+## Length of Tweet in Characters
+
+```{r}
+# will be again based on the original tweet, since that is what user users saw and interacted with
+tweet_data$charLength <- lapply(tweet_data$original_tweet, nchar)
+```
+
+## Positive Interaction Term
+
+From the code that was initially thought to be used to replicate Stieglity, we already have an interaction term in our data.
+It is defined to be $negative \times sentiment$.
+
+Rename it to avoid confusion and create the positive interaction term as well:
+
+```{r}
+tweet_data$ct_negative_interaction <- tweet_data$ct_interactionTerm
+tweet_data$ct_positive_interaction <- tweet_data$ct_sentiment * tweet_data$ct_positiveScore
+```
+
+
+# Investigation of crass outliers in our target variables
+
+```{r}
+hist(tweet_data[tweet_data$likes>0])
+```
+
+
+# Modelling
+
+## Modelling Binary Targets
+
+### Commented
+
+```{r}
+stargazer(glm(repliedTo ~ hashtags + hashtagCount + 
+                url + 
+                WC + charLength
+                ct_negative_interaction + ct_positive_interaction +
+                ct_negativeScore + ct_positiveScore +
+                i + we + they,
+    data = tweet_data,
+    family = binomial(link = 'logit')), type = 'text')
+```
+
+### Liked
+
+### Replied To
+
+
+## Modelling Count Targets
+
+
+# Target: Did engagement happen at all?
+
+```{r include=FALSE}
+# cor.test(x, y, method=c("pearson", "kendall", "spearman"))
+```
+
+The interactionTerm is defined as sentiment multiplied by negative sentiment where sentiment is defined as $sentiment = (positive - negative) - 2$.
+Polarity is defined as $poarity = positive + negative$. These are based on the SentiStrength Analysis described in Stieglitz 2013.
+Logistic regression as the target is 1/0 classification (either interaction took place or not).
+
+## Other used features:
+
+url - was at least one URL contained in the original tweet?
+hashtags - was at least one hashtag used?
+positiveScore - the positive sentiment score of SentiStrength (0 to 5)
+negativeScore - the negative sentiment score of SentiStrength (0 to 5)
+posemo - positive sentiment score according to LIWC
+negemo - negative sentiment score according to LIWC
+anx - anxiety (LIWC)
+anger (LIWC)
+sad (LIWC)
+i speak (LIWC)
+we speak (LIWC) / we, they
+
+All Sentiment Scores are based on the original tweet texts.
+
+## Other available features
+
+- SentiStrength Scores for preprocessed tweets 
+  - with urls, emails,... removed
+  - above + stemmed using porter stemmer
+  - abote + removal of emojis
+- everything else that is mentioned in the LIWC data manual (all for the original tweet texts)
+
+
+
+```{r}
+# modelling separately for comments, likes and replies each
+stargazer(glm(engaged ~ hashtags + url + ot_polarity + ot_interactionTerm,
+    data = tweet_data,
+    family = binomial(link = 'logit')), type = 'text')
+```
+
+# Modelling the count of interactions
+
+Using a negative binomial regression as our dependent variable is a count.
+
+```{r}
+summary(glm.nb(engagement ~ hashtags + url + i + we + they,
+               data = tweet_data))
+```
