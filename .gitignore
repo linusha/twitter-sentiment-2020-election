@@ -7,3 +7,11 @@ tweet_counts
 *.tar
 *.html
 *.Rproj
+
+*.pdf
+
+complete_data.csv
+
+.RData
+
+.Rhistory
