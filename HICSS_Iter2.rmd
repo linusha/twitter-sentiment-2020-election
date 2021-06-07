@@ -17,6 +17,8 @@ library(stringr)
 tweet_data <- read.csv('complete_data.csv')
 ```
 
+Overall size of our sample: `r nrow(tweet_data)` tweets.
+
 We will work with the sentiment scores of the `clean_tweet`s I scraped. The following preprocessing has occured on that:
 
 - Beginning with the original tweet
