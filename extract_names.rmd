@@ -1,0 +1,17 @@
+---
+title: "Extract Names from Tweets"
+author: "Linus Hagemann"
+date: "June 9, 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+twitter_data <- read.csv('./data/deduplicated_tweets.csv.clean', header = FALSE)
+names <- twitter_data[,7]
+write.csv(names, 'names_of_tweeters_in_order')
+```
+

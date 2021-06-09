@@ -1,0 +1,32 @@
+---
+title: "Convert socialbakers to Usable Format"
+author: "Linus Hagemann"
+date: "June 9, 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+pol <- read.table(file = "politicians.txt", sep = '\n')
+celeb <- read.table(file = "celebrities.txt", sep = '\n')
+media <- read.table(file = "media.txt", sep = '\n')
+pol_followers <- read.table(file = "politicians_follower.txt", sep = '\n')
+celeb_followers <- read.table(file = "celebrities_folowers.txt", sep = '\n')
+media_followers <- read.table(file = "media_followers.txt", sep = '\n')
+
+politicians <- data.frame(pol, pol_followers)
+names(politicians) <- c('handle','followers')
+write.csv(politicians, 'politiciancs.csv')
+
+celebs <- data.frame(celeb, celeb_followers)
+names(celebs) <- c('handle','followers')
+write.csv(celebs, 'celebrities.csv')
+
+media <- data.frame(media, media_followers)
+names(media) <- c('handle','followers')
+write.csv(media, 'media.csv')
+```
+
