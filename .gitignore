@@ -17,3 +17,9 @@ complete_data.csv
 .Rhistory
 
 clean_tweets.csv
+
+*.csv
+
+*.txt
+
+names_of_tweeters_in_order
