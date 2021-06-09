@@ -1,0 +1,64 @@
+---
+title: "Mark Famous Tweets"
+author: "Linus Hagemann"
+date: "June 9, 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+tweet_usernames <- read.csv('names_of_tweeters_in_order')
+media <- read.csv('media.csv')
+politicians <- read.csv('politiciancs.csv')
+calebrities <- read.csv('celebrities.csv')
+```
+
+```{r}
+# lowercasing all usernames
+media$handle <- tolower(media$handle)
+politicians$handle <- tolower(politicians$handle)
+calebrities$handle <- tolower(calebrities$handle)
+```
+
+```{r}
+famous_people <- rbind(media, politicians, calebrities)
+```
+
+# Classifying tweets
+
+```{r}
+# 0 - not famous
+# 1 - famous 
+# 2 - famous over 100 000
+# 3 - famous over 1 000 000
+# 4 - famous over 50 000 000
+# 5 - famous over 100 000 000
+
+categorizeFollowersNumber <- function (username) {
+  if(username %in% famous_people$handle){
+    followers <- famous_people$followers[famous_people$handle == username]
+    if (followers > 100000000) return(5);
+    if (followers > 50000000) return(4);
+    if (followers > 1000000) return(3);
+    if (followers > 100000) return(2);
+    return(1);
+  }
+  return(0);
+}
+```
+
+```{r}
+isInFamousSample <- sapply(tweet_usernames$x, function(name) ifelse(name %in% famous_people$handle, 1, 0))
+famousTweeterLevel <- sapply(tweet_usernames$x, categorizeFollowersNumber)
+```
+
+```{r}
+tweet_famous_level <- data.frame(isInFamousSample, famousTweeterLevel)
+names(tweet_famous_level) <- c('isFamous', 'fameLevel')
+write.csv(tweet_famous_level,'tweets_famous.csv')
+```
+
+
