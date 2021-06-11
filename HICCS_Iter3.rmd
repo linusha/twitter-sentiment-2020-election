@@ -166,6 +166,11 @@ stargazer(glm(retweeted ~ hashtagCount + url +
 
 These only take into account tweets that were liked / replied / commented at least once.
 
+### Likes
+
+Tried similar models to the one below, unfortunately could not fit one that converged. Maybe since there is additional signal that we did not catch?
+Liking something is the least effortful interaction possible on twitter. For a reply something needs to be written, retweets are a higher "commitment", since the retweet will be shown on the own timeline.
+
 ### Replies
 
 ```{r}
@@ -176,18 +181,6 @@ summary(glm.nb(replies ~ hashtagCount + url +
                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
                 data = not_famous_tweet_data[not_famous_tweet_data$replies > 0,]))
-```
-
-### Likes
-
-```{r}
-summary(glm.nb(likes ~ hashtagCount + url + 
-               cleanLIWC_WC + user_activity
-                + flesch + #controls
-                ct_polarity + ct_sentiment + # emotions
-                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                data = not_famous_tweet_data[not_famous_tweet_data$likes > 0,]))
 ```
 
 ### Retweets
@@ -223,26 +216,9 @@ summary(glm.nb(replies ~ hashtagCount + url +
 
 #### Likes
 
-```{r}
-summary(glm.nb(likes ~ hashtagCount + url + 
-               cleanLIWC_WC + user_activity
-                + fameLevel + flesch + #controls
-                ct_polarity + ct_sentiment + # emotions
-                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                data = famous_tweet_data))
-```
+I again could not manage to produce something that runs, maybe a similar issue to the one above. Sorry.
 
 #### Retweets
 
-```{r}
-summary(glm.nb(retweets ~ hashtagCount + url + 
-               cleanLIWC_WC + user_activity
-                + fameLevel + flesch + #controls
-                ct_polarity + ct_sentiment + # emotions
-                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                data = famous_tweet_data))
-
-```
+Same here :/
 
