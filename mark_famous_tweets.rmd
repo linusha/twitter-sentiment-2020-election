@@ -39,7 +39,7 @@ famous_people <- rbind(media, politicians, calebrities)
 
 categorizeFollowersNumber <- function (username) {
   if(username %in% famous_people$handle){
-    followers <- famous_people$followers[famous_people$handle == username]
+    followers <- as.integer(gsub("[^0-9.-]", "", famous_people[famous_people$handle==username,]$followers))
     if (followers > 100000000) return(5);
     if (followers > 50000000) return(4);
     if (followers > 1000000) return(3);
