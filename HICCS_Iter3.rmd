@@ -164,7 +164,10 @@ stargazer(glm(retweeted ~ hashtagCount + url +
 
 ## Modelling count on Tweets from not famous people
 
+These only take into account tweets that were liked / replied / commented at least once.
+
 ### Replies
+
 ```{r}
 summary(glm.nb(replies ~ hashtagCount + url + 
                cleanLIWC_WC + user_activity
@@ -176,6 +179,7 @@ summary(glm.nb(replies ~ hashtagCount + url +
 ```
 
 ### Likes
+
 ```{r}
 summary(glm.nb(likes ~ hashtagCount + url + 
                cleanLIWC_WC + user_activity
