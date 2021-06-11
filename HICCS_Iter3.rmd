@@ -1,0 +1,244 @@
+---
+title: "HICSS Modelling"
+author: "Linus Hagemann"
+date: "June 10, 2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+library(stargazer)
+library(MASS)
+library(stringr)
+library(qdap)
+library(DataExplorer)
+library(sylcount)
+library(here)
+here()
+load(here('prod.RData'))
+tweet_data <- tweet_data[tweet_data$fameLevel != 5,]
+famous_tweet_data <- famous_tweet_data[famous_tweet_data$fameLevel != 5,]
+not_famous_tweet_data <- tweet_data[tweet_data$fameLevel == 0,]
+```
+
+Overall size of our sample: `r nrow(tweet_data)` tweets.
+
+We will work with the sentiment scores of the `clean_tweet`s I scraped. (*This is also the reason some variables are prefixed with `ct` or similar.*) The following preprocessing has occured on that:
+
+- Beginning with the original tweet
+- content of the tweet has been converted to lower case
+- all urls, hashtags (#) and e-mail adresses has been removed
+- the actual words of the hashtags have been preserved (e.g. *#Biden* now reads *biden*).
+
+# Modelling
+
+Here is a list of all features used in the following modelling:
+
+|           Name          |                                         Description                                        |          Comment         |
+|:-----------------------:|:------------------------------------------------------------------------------------------:|:------------------------:|
+|        retweeted        |                                         TRUE/FALSE                                         |                          |
+|         retweets        |                                     Number of Retweets                                     |                          |
+|        repliedTo        |                                         TRUE/FALSE                                         |                          |
+|         replies         |                                      Number of Replies                                     |                          |
+|          liked          |                                         TRUE/FALSE                                         |                          |
+|          likes          |                                       Number of Likes                                      |                          |
+|       hashtagCount      |                                 Number of Hashtags in Tweet                                |                          |
+|           url           |                                         TRUE/FALSE                                         |                          |
+|            WC           |                       Length of tweet as it appeared online in words                       |           LIWC           |
+|     sentiment           |                            0 - 8                                                           |      Stieglitz           |
+|     polarity            |                            0 - 8                                                           |      Stieglitz           |
+|            i            |                                                                                            |           LIWC           |
+|            we           |                                                                                            |           LIWC           |
+|           they          |                                                                                            |           LIWC           |
+|          flesch         |                      calculated based on the output from LIWC/manually                     |                          |
+|      user_activity      |          Amount of tweets user made in the timeframe in which we collected tweets          |  also done by Stieglitz  |
+|         insight         |                                                                                            |           LIWC           |
+|          cause          |                                                                                            |           LIWC           |
+|         discrep         |                                                                                            |           LIWC           |
+|         certain         |                                                                                            |           LIWC           |
+|        fameLevel        | 0 - not on list, 1 - on list, 2 - on list over 100k follower, 3 - over 1kk, 5 - over 100kk |                          |
+
+**The original positive and negative scores were ommited from the model due to them being redundant because of their high correlation with sentiment and polarity.**
+
+## Summary Statistics
+
+Just a small collection of stats for our sample that may be interesting.
+
+### Sentiment
+
+```{r}
+# all
+table(tweet_data$ct_sentiment)
+table(tweet_data$ct_polarity)
+# famous
+table(famous_tweet_data$ct_sentiment)
+table(famous_tweet_data$ct_polarity)
+# not famous
+table(not_famous_tweet_data$ct_sentiment)
+table(not_famous_tweet_data$ct_polarity)
+```
+
+### Prosocial
+
+```{r}
+# all
+table(tweet_data$cleanLIWC_i)
+table(tweet_data$cleanLIWC_we)
+table(tweet_data$cleanLIWC_they)
+# famous
+table(famous_tweet_data$cleanLIWC_i)
+table(famous_tweet_data$cleanLIWC_we)
+table(famous_tweet_data$cleanLIWC_they)
+# not famous
+table(not_famous_tweet_data$cleanLIWC_i)
+table(not_famous_tweet_data$cleanLIWC_we)
+table(not_famous_tweet_data$cleanLIWC_they)
+```
+
+### Cognitive
+
+```{r}
+# all
+table(tweet_data$cleanLIWC_cause)
+table(tweet_data$cleanLIWC_certain)
+table(tweet_data$cleanLIWC_insight)
+table(tweet_data$cleanLIWC_discrep)
+# famous
+table(famous_tweet_data$cleanLIWC_cause)
+table(famous_tweet_data$cleanLIWC_certain)
+table(famous_tweet_data$cleanLIWC_insight)
+table(famous_tweet_data$cleanLIWC_discrep)
+# not famous
+table(not_famous_tweet_data$cleanLIWC_cause)
+table(not_famous_tweet_data$cleanLIWC_certain)
+table(not_famous_tweet_data$cleanLIWC_insight)
+table(not_famous_tweet_data$cleanLIWC_discrep)
+```
+
+
+## Modelling on all Tweets in the data set
+
+### Modelling Binary Targets
+
+Using logistic regression.
+
+#### Commented
+
+```{r}
+stargazer(glm(repliedTo ~ hashtagCount + url + 
+               cleanLIWC_WC + user_activity
+                + fameLevel + flesch + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+    data = tweet_data,
+    family = binomial(link = 'logit')), type = 'text')
+```
+
+#### Liked
+
+```{r}
+stargazer(glm(liked ~ hashtagCount + url + 
+               cleanLIWC_WC + user_activity
+                + fameLevel + flesch + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+    data = tweet_data,
+    family = binomial(link = 'logit')), type = 'text')
+```
+
+#### Retweeted
+
+```{r}
+stargazer(glm(retweeted ~ hashtagCount + url + 
+               cleanLIWC_WC + user_activity
+                + fameLevel + flesch + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+    data = tweet_data,
+    family = binomial(link = 'logit')), type = 'text')
+```
+
+
+## Modelling count on Tweets from not famous people
+
+### Replies
+```{r}
+summary(glm.nb(replies ~ hashtagCount + url + 
+               cleanLIWC_WC + user_activity
+                + flesch + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+                data = not_famous_tweet_data[not_famous_tweet_data$replies > 0,]))
+```
+
+### Likes
+```{r}
+summary(glm.nb(likes ~ hashtagCount + url + 
+               cleanLIWC_WC + user_activity
+                + flesch + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+                data = not_famous_tweet_data[not_famous_tweet_data$likes > 0,]))
+```
+
+### Retweets
+
+```{r}
+summary(glm.nb(retweets ~ hashtagCount + url + 
+               cleanLIWC_WC + user_activity
+                + flesch + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+                data = not_famous_tweet_data[not_famous_tweet_data$retweets > 0,]))
+```
+
+
+## Modelling on the tweets of important people
+
+People/Tweeters are deemed important or famous if they are on our list of media/celebrity/politicians accounts from socialbakers.
+This subsample is smaller and only contains `r nrow(famous_tweet_data)` tweets. Negative Binomial models are considered not suitable for small data sets (although there does not seem to be an universal consensus what that means in raw numbers). I therefore opt try the same models as above here again and we'll see how we like it.
+
+
+#### Comments
+
+```{r}
+summary(glm.nb(replies ~ hashtagCount + url + 
+               cleanLIWC_WC + user_activity
+                + fameLevel + flesch + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+                data = famous_tweet_data))
+```
+
+#### Likes
+
+```{r}
+summary(glm.nb(likes ~ hashtagCount + url + 
+               cleanLIWC_WC + user_activity
+                + fameLevel + flesch + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+                data = famous_tweet_data))
+```
+
+#### Retweets
+
+```{r}
+summary(glm.nb(retweets ~ hashtagCount + url + 
+               cleanLIWC_WC + user_activity
+                + fameLevel + flesch + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+                data = famous_tweet_data))
+
+```
+
