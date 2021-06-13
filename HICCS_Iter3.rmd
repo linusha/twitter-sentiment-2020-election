@@ -5,6 +5,7 @@ date: "June 10, 2021"
 output: pdf_document
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 library(stargazer)
@@ -16,6 +17,9 @@ library(sylcount)
 library(here)
 here()
 load(here('final_data.RData'))
+```
+
+```{r include=FALSE}
 ```
 
 Overall size of our sample: `r nrow(tweet_data)` tweets.
@@ -47,7 +51,6 @@ Here is a list of all features used in the following modelling:
 |            i            |                                                                                            |           LIWC           |
 |            we           |                                                                                            |           LIWC           |
 |           they          |                                                                                            |           LIWC           |
-|          flesch         |                      calculated based on the output from LIWC/manually                     |                          |
 |      user_activity      |          Amount of tweets user made in the timeframe in which we collected tweets          |  also done by Stieglitz  |
 |         insight         |                                                                                            |           LIWC           |
 |          cause          |                                                                                            |           LIWC           |
@@ -68,7 +71,7 @@ Using logistic regression.
 ```{r}
 stargazer(glm(repliedTo ~ hashtagCount + url + 
                cleanLIWC_WC + user_activity
-                + fameLevel + flesch + #controls
+                + fameLevel +  #controls
                 ct_polarity + ct_sentiment + # emotions
                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
@@ -81,7 +84,7 @@ stargazer(glm(repliedTo ~ hashtagCount + url +
 ```{r}
 stargazer(glm(liked ~ hashtagCount + url + 
                cleanLIWC_WC + user_activity
-                + fameLevel + flesch + #controls
+                + fameLevel + #controls
                 ct_polarity + ct_sentiment + # emotions
                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
@@ -94,7 +97,7 @@ stargazer(glm(liked ~ hashtagCount + url +
 ```{r}
 stargazer(glm(retweeted ~ hashtagCount + url + 
                cleanLIWC_WC + user_activity
-                + fameLevel + flesch + #controls
+                + fameLevel + #controls
                 ct_polarity + ct_sentiment + # emotions
                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
@@ -109,15 +112,25 @@ These only take into account tweets that were liked / replied / commented at lea
 
 ### Likes
 
-Tried similar models to the one below, unfortunately could not fit one that converged. Maybe since there is additional signal that we did not catch?
-Liking something is the least effortful interaction possible on twitter. For a reply something needs to be written, retweets are a higher "commitment", since the retweet will be shown on the own timeline.
+There still seems to be a problem, maybe you could take a look?
+
+```{r}
+# summary(glm.nb(likes ~ hashtagCount + url + 
+#                cleanLIWC_WC + user_activity
+#                 + #controls
+#                 ct_polarity + ct_sentiment + # emotions
+#                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+#                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+#                 data = not_famous_tweet_data[not_famous_tweet_data$likes > 0,],
+#                control=glm.control(maxit=200)))
+```
 
 ### Replies
 
 ```{r}
 summary(glm.nb(replies ~ hashtagCount + url + 
                cleanLIWC_WC + user_activity
-                + flesch + #controls
+                + #controls
                 ct_polarity + ct_sentiment + # emotions
                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
@@ -129,7 +142,7 @@ summary(glm.nb(replies ~ hashtagCount + url +
 ```{r}
 summary(glm.nb(retweets ~ hashtagCount + url + 
                cleanLIWC_WC + user_activity
-                + flesch + #controls
+                + #controls
                 ct_polarity + ct_sentiment + # emotions
                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
@@ -148,7 +161,7 @@ This subsample is smaller and only contains `r nrow(famous_tweet_data)` tweets. 
 ```{r}
 summary(glm.nb(replies ~ hashtagCount + url + 
                cleanLIWC_WC + user_activity
-                + fameLevel + flesch + #controls
+                + fameLevel + #controls
                 ct_polarity + ct_sentiment + # emotions
                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
@@ -157,9 +170,32 @@ summary(glm.nb(replies ~ hashtagCount + url +
 
 #### Likes
 
-I again could not manage to produce something that runs, maybe a similar issue to the one above. Sorry.
+Fails for me with `Error in glm.fitter(x = X, y = Y, w = w, etastart = eta, offset = offset, : NA/NaN/Inf in 'x'`. 
+
+```{r}
+# summary(glm.nb(likes ~ hashtagCount + url + 
+#                cleanLIWC_WC + user_activity
+#                 + fameLevel + #controls
+#                 ct_polarity + ct_sentiment + # emotions
+#                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+#                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+#                 control=glm.control(maxit=200),
+#                 data = famous_tweet_data))
+```
 
 #### Retweets
 
-Same here :/
+Same as above.
+
+```{r}
+# summary(glm.nb(retweets ~ hashtagCount + url + 
+#                cleanLIWC_WC + user_activity
+#                 + fameLevel + #controls
+#                 ct_polarity + ct_sentiment + # emotions
+#                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+#                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+#                 data = famous_tweet_data),
+#           control=glm.control(maxit=200))
+```
+
 
