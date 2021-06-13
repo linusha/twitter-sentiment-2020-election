@@ -1,0 +1,49 @@
+---
+title: "Graphics"
+author: "Linus Hagemann"
+date: "June 11, 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+library(stargazer)
+library(MASS)
+library(stringr)
+library(qdap)
+library(DataExplorer)
+library(sylcount)
+library(here)
+here()
+# DO NOT CHANGE ANYTHING HERE PLEASE
+# load(here('prod.RData'))
+# tweet_data <- (tweet_data[!tweet_data$likes > 500000,])
+# tweet_data <- (tweet_data[!tweet_data$replies > 20000,])
+# tweet_data <- tweet_data[tweet_data$fameLevel != 5,]
+# famous_tweet_data <- famous_tweet_data[famous_tweet_data$fameLevel != 5,]
+# not_famous_tweet_data <- tweet_data[tweet_data$fameLevel == 0,]
+# save(tweet_data, famous_tweet_data, not_famous_tweet_data, file = here('final_data.RData'))
+# load(here('final_data.RData'))
+```
+
+```{r include=FALSE, eval=FALSE}
+# load(here('prod.RData'))
+# tweet_data <- (tweet_data[!tweet_data$likes > 500000,])
+# tweet_data <- (tweet_data[!tweet_data$replies > 20000,])
+# tweet_data <- tweet_data[tweet_data$fameLevel != 5,]
+# famous_tweet_data <- tweet_data[tweet_data$fameLevel != 0,]
+# famous_tweet_data <- famous_tweet_data[famous_tweet_data$fameLevel != 5,]
+# not_famous_tweet_data <- tweet_data[tweet_data$fameLevel == 0,]
+# tweet_data$flesch <- NULL
+# save(tweet_data, famous_tweet_data, not_famous_tweet_data, file = here('final_data.RData'))
+```
+
+Just a small collection of stats for our sample that may be interesting.
+
+```{r}
+plot_histogram(tweet_data)
+plot_boxplot(tweet_data, by = "liked")
+```
+
+
+
