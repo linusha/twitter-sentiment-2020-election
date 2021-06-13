@@ -15,10 +15,7 @@ library(DataExplorer)
 library(sylcount)
 library(here)
 here()
-load(here('prod.RData'))
-tweet_data <- tweet_data[tweet_data$fameLevel != 5,]
-famous_tweet_data <- famous_tweet_data[famous_tweet_data$fameLevel != 5,]
-not_famous_tweet_data <- tweet_data[tweet_data$fameLevel == 0,]
+load(here('final_data.RData'))
 ```
 
 Overall size of our sample: `r nrow(tweet_data)` tweets.
@@ -59,62 +56,6 @@ Here is a list of all features used in the following modelling:
 |        fameLevel        | 0 - not on list, 1 - on list, 2 - on list over 100k follower, 3 - over 1kk, 5 - over 100kk |                          |
 
 **The original positive and negative scores were ommited from the model due to them being redundant because of their high correlation with sentiment and polarity.**
-
-## Summary Statistics
-
-Just a small collection of stats for our sample that may be interesting.
-
-### Sentiment
-
-```{r}
-# all
-table(tweet_data$ct_sentiment)
-table(tweet_data$ct_polarity)
-# famous
-table(famous_tweet_data$ct_sentiment)
-table(famous_tweet_data$ct_polarity)
-# not famous
-table(not_famous_tweet_data$ct_sentiment)
-table(not_famous_tweet_data$ct_polarity)
-```
-
-### Prosocial
-
-```{r}
-# all
-table(tweet_data$cleanLIWC_i)
-table(tweet_data$cleanLIWC_we)
-table(tweet_data$cleanLIWC_they)
-# famous
-table(famous_tweet_data$cleanLIWC_i)
-table(famous_tweet_data$cleanLIWC_we)
-table(famous_tweet_data$cleanLIWC_they)
-# not famous
-table(not_famous_tweet_data$cleanLIWC_i)
-table(not_famous_tweet_data$cleanLIWC_we)
-table(not_famous_tweet_data$cleanLIWC_they)
-```
-
-### Cognitive
-
-```{r}
-# all
-table(tweet_data$cleanLIWC_cause)
-table(tweet_data$cleanLIWC_certain)
-table(tweet_data$cleanLIWC_insight)
-table(tweet_data$cleanLIWC_discrep)
-# famous
-table(famous_tweet_data$cleanLIWC_cause)
-table(famous_tweet_data$cleanLIWC_certain)
-table(famous_tweet_data$cleanLIWC_insight)
-table(famous_tweet_data$cleanLIWC_discrep)
-# not famous
-table(not_famous_tweet_data$cleanLIWC_cause)
-table(not_famous_tweet_data$cleanLIWC_certain)
-table(not_famous_tweet_data$cleanLIWC_insight)
-table(not_famous_tweet_data$cleanLIWC_discrep)
-```
-
 
 ## Modelling on all Tweets in the data set
 
