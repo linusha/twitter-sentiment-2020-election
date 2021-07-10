@@ -27,3 +27,8 @@ This results in a single file containing all collected tweets with exact data du
 
 This file can now be used as input for the `clean_and_process_tweets.py` script. It will generate some of the features used in the later analysis, filter for non-english tweets and also output different versions of the original tweets. Please note, that we only used the so called *clean* tweets in the end.
 For this step, the `process_tweets` step of the provided Makefile can be used.
+
+### Sentiment Analysis using SentiStrength
+
+SentiStrength can be acquired from the [official website](http://sentistrength.wlv.ac.uk/). Then, the `sentiment` target of the Makefile can be executed.
+Afterwards, the `process_sentiment` target of the Makefile will execute the `process_sentiment.py` script for all of the SentiStrength output files produced previously. There exists a `senti` target in the Makefile that combines both of these steps. The python script will execute some calculations and transformations to derive features used in the later analysis. The script can be found in the `/sentiment_senti-strength` directory.
