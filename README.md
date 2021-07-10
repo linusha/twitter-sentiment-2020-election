@@ -1,6 +1,7 @@
 # twitter-sentiment-2020-election
 
-This repository contains code and data used for a conceptual replication of "Emotions and Information Diffusion in Social Media - Sentiment of Microblogs and Sharing Behavior" (Stieglitz, Dang-Xuan. 2013).
+All code is under MIT license.
+Please note that all data herein, figures and texts that are part of the data analysis are exempt from this license.
 
 All code is under MIT license. Please note that all data herein, figures and texts that are part of the data analysis are extempt to this.
 
@@ -8,7 +9,7 @@ All code is under MIT license. Please note that all data herein, figures and tex
 
 The following paragraphs should give you a good overview of how to use the scripts in this repository given previous exposure to the command line, python and R. They are focused more on the how than the why. Please see the corresponding publication for further details.
 
-### Collecting data
+### Collecting Data
 
 The relevant files are contained in the `/collection` directory.
 The queries contained in the corresponding file in this repository were run using [`twint`](https://pypi.org/project/twint/) in version 2.1.22.
@@ -28,7 +29,7 @@ This results in a single file containing all collected tweets with exact data du
 This file can now be used as input for the `clean_and_process_tweets.py` script. It will generate some of the features used in the later analysis, filter for non-english tweets and also output different versions of the original tweets. Please note, that we only used the so called *clean* tweets in the end.
 For this step, the `process_tweets` step of the provided Makefile can be used.
 
-### Sentiment Analysis using SentiStrength
+### Sentiment Analysis Using SentiStrength
 
 SentiStrength can be acquired from the [official website](http://sentistrength.wlv.ac.uk/). Then, the `sentiment` target of the Makefile can be executed.
 Afterwards, the `process_sentiment` target of the Makefile will execute the `process_sentiment.py` script for all of the SentiStrength output files produced previously. There exists a `senti` target in the Makefile that combines both of these steps. The python script will execute some calculations and transformations to derive features used in the later analysis. The script can be found in the `/sentiment_senti-strength` directory.
@@ -43,3 +44,8 @@ The clean_tweets can then be analyzed with LIWC. This will produce a separate `.
 
 To take into account the impact a large amounts of followers have on subsequent engagement with tweets, we marked tweets from influential people as such.
 For this, the `mark_famous_tweets.rmd` script can be used. All necessary files are already present in the `/relevant_accounts` directory. Otherwise they could be generated using the `socialbakers_conversion.rmd` script. Please note, that you might need to extract the usernames from a previously generated file using `extract_names.rmd`.
+
+### Final Merging and Modelling
+
+Scripts can be found in the `/analysis` directory. First, step through `feature_creation.rmd`. Code for the models can be found in `modelling.rmd`.
+Depending on which steps from the `feature_creation` script were executed, you might need to run Steps 1 and/or 2 from `filtering.rmd`.

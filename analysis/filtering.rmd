@@ -1,0 +1,42 @@
+---
+title: "Filtering"
+author: "Linus Hagemann"
+date: "June 11, 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+library(here)
+here()
+```
+
+# Step 1
+
+```{r}
+load(here('prod.RData'))
+tweet_data <- (tweet_data[!tweet_data$likes > 500000,])
+tweet_data <- (tweet_data[!tweet_data$replies > 20000,])
+tweet_data <- tweet_data[tweet_data$fameLevel != 5,]
+famous_tweet_data <- famous_tweet_data[famous_tweet_data$fameLevel != 5,]
+not_famous_tweet_data <- tweet_data[tweet_data$fameLevel == 0,]
+save(tweet_data, famous_tweet_data, not_famous_tweet_data, file = here('final_data.RData'))
+load(here('final_data.RData'))
+```
+
+# Step 2
+
+```{r include=FALSE, eval=FALSE}
+load(here('prod.RData'))
+tweet_data <- (tweet_data[!tweet_data$likes > 500000,])
+tweet_data <- (tweet_data[!tweet_data$replies > 20000,])
+tweet_data <- tweet_data[tweet_data$fameLevel != 5,]
+famous_tweet_data <- tweet_data[tweet_data$fameLevel != 0,]
+famous_tweet_data <- famous_tweet_data[famous_tweet_data$fameLevel != 5,]
+not_famous_tweet_data <- tweet_data[tweet_data$fameLevel == 0,]
+tweet_data$flesch <- NULL
+save(tweet_data, famous_tweet_data, not_famous_tweet_data, file = here('final_data.RData'))
+```
+
+
+

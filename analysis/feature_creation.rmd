@@ -1,0 +1,96 @@
+---
+title: "Twitter Election Sentiment Feature Creation I"
+author: "Linus Hagemann"
+date: "June 7, 2021"
+output: pdf_document
+---
+
+# Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(stargazer)
+library(MASS)
+library(stringr)
+library(qdap)
+library(DataExplorer)
+library(sylcount)
+```
+
+# Data Merging
+
+```{r include=FALSE}
+# liwc output for cleaned tweets
+clean_tweet_liwc <- read.csv('clean_tweets_liwc.csv')
+# famous and famous level
+famous <- read.csv('tweets_famous.csv')
+
+# cleaning for easier reading
+tweet_data$X <- NULL
+tweet_data$X.1 <- NULL
+tweet_data$Analytic <- NULL
+tweet_data$Clout <- NULL
+tweet_data$Authentic <- NULL
+tweet_data$Tone <- NULL
+tweet_data <- tweet_data[,1:40]
+tweet_data$WPS <- NULL
+tweet_data$Sixltr <- NULL
+tweet_data$Dic <- NULL
+tweet_data$function. <- NULL
+famous$X <- NULL
+clean_tweet_liwc$A <- NULL
+clean_tweet_liwc$B <- NULL
+
+tweet_data <- cbind(tweet_data, famous)
+colnames(clean_tweet_liwc) <- paste0("cleanLIWC_", colnames(clean_tweet_liwc))
+tweet_data <- cbind(tweet_data, clean_tweet_liwc)
+```
+
+# Feature Creation
+
+```{r}
+tweet_data$liked <- ifelse(tweet_data$likes != 0, TRUE, FALSE)
+tweet_data$retweeted <- ifelse(tweet_data$retweets != 0, TRUE, FALSE)
+tweet_data$repliedTo <- ifelse(tweet_data$replies != 0, TRUE, FALSE)
+```
+
+## Count of Present Hashtags in a Tweet
+
+```{r}
+# we just assume the number of # to be equal to the number of hashtags
+# is just a heuristic, but with only 280 character/tweet and over 3 million tweets
+# this should be reasonable in grand scheme of things
+# we need to base this on the original tweet, since otherwise the # are already removed
+tweet_data$hashtagCount <- lapply(tweet_data$original_tweet, stringr::str_count, pattern = '#')
+```
+
+## Length of Tweet in Characters
+
+```{r}
+# will be again based on the original tweet, since that is what user users saw and interacted with
+tweet_data$charLength <- lapply(tweet_data$original_tweet, nchar)
+```
+
+## Positive Interaction Term
+
+From the previous code, we already have an interaction term in our data.
+It is defined to be $negative \times sentiment$.
+
+Rename it to avoid confusion and create the positive interaction term as well:
+
+```{r}
+tweet_data$ct_negative_interaction <- tweet_data$ct_interactionTerm
+tweet_data$ct_positive_interaction <- tweet_data$ct_sentiment * tweet_data$ct_positiveScore
+```
+
+## Mirror negative score to be easier to interpret
+
+```{r}
+tweet_data$ct_negativeScoreToUse <- tweet_data$ct_negativeScore * -1
+```
+
+# Export
+
+```{r}
+write.csv(tweet_data, "final_data.csv")
+```
