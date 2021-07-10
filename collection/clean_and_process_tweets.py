@@ -1,6 +1,5 @@
 import sys
 import csv
-import datetime
 import logging
 import re
 import string

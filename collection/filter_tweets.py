@@ -1,6 +1,5 @@
 import sys
 import csv
-import datetime
 import logging
 from langdetect import DetectorFactory, detect
 

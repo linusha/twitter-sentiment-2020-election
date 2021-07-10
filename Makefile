@@ -48,4 +48,4 @@ clean:
 	rm -f clean_tweets.csv orig_tweets.csv data.csv no_emojis_tweets.csv preprocessed_tweets.csv
 
 process_tweets:
-	python3 scrape_data_and_analyze_tweets.py ./data/deduplicated_tweets.csv.clean data.csv orig_tweets.csv clean_tweets.csv no_emojis_tweets.csv preprocessed_tweets.csv
+	python3 clean_and_process_tweets.py ./data/deduplicated_tweets.csv.clean data.csv orig_tweets.csv clean_tweets.csv no_emojis_tweets.csv preprocessed_tweets.csv

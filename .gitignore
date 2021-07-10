@@ -1,6 +1,5 @@
 /SentiStrength/*
 /data/*
-*.log
 tweet_counts
 .Rproj.user
 /results/*
@@ -20,6 +19,5 @@ clean_tweets.csv
 
 *.csv
 
-*.txt
 
 names_of_tweeters_in_order
