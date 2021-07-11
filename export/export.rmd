@@ -1,0 +1,19 @@
+---
+title: "Data Publication"
+author: "Linus Hagemann"
+date: "July 11, 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+load('final_final_data.RData')
+tweet_data$clean_tweet <- NULL
+famous_tweet_data$clean_tweet <- NULL
+not_famous_tweet_data$clean_tweet <- NULL
+save.image('data_for_modelling.RData')
+```
+
