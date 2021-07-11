@@ -1,13 +1,18 @@
 # twitter-sentiment-2020-election
 
-All code is under MIT license.
-Please note that all data herein, figures and texts that are part of the data analysis are exempt from this license.
 
-All code is under MIT license. Please note that all data herein, figures and texts that are part of the data analysis are extempt to this.
+## Steps for Replication
 
-## Process
+The following paragraphs should give you a good overview of how to use the scripts in this repository given previous exposure to the command line, python and R. They are focused more on the how than the why. Please see the corresponding publication for further details. This repository utilizes [Git Large File Storage](https://git-lfs.github.com/).
 
-The following paragraphs should give you a good overview of how to use the scripts in this repository given previous exposure to the command line, python and R. They are focused more on the how than the why. Please see the corresponding publication for further details.
+Following the steps outlined below should allow you to replicate our findings, beginning by the collection of the data.
+Please be aware that the availability of tweets might have changed since we collected the original data set.
+For entry-point ready data-sets, please take a look at the "Data" section below.
+
+Please note, that this code makes some assumptions about naming schemes, directory structures, ... that might be not documented.
+Therefore, changes to the code will be necessary in order to run it successfully. 
+
+Please reach out with any questions directly or open a ticket in this repository.
 
 ### Collecting Data
 
@@ -49,3 +54,21 @@ For this, the `mark_famous_tweets.rmd` script can be used. All necessary files a
 
 Scripts can be found in the `/analysis` directory. First, step through `feature_creation.rmd`. Code for the models can be found in `modelling.rmd`.
 Depending on which steps from the `feature_creation` script were executed, you might need to run Steps 1 and/or 2 from `filtering.rmd`.
+
+## Data
+
+We provide the data set we used for modelling as `RData` as well as the original tweet data set we collected.
+Please note, that the data we used for modelling is not easily matchable to the original tweets.
+
+Both files can be found in the `data` directory. The `RData` file can simply be imported into an `R` environment and should allow you to start directly with the modelling step.
+
+Because of the Twitter TOS, you need to hydrate the original dataset of tweets we collected yourself. For this you will need a Twitter API key. Suitable tools for hydrating the data are [`hydator`](https://github.com/DocNow/hydrator) (GUI) and [`twarc`](https://github.com/DocNow/twarc) (python).
+In case you need additional data or help, please reach out via e-mail.
+
+The code used to provide this data in addition to the above described steps can be found in the `/export` directory.
+
+## License
+
+Copyright © 2021 Linus Hagemann, Olga Abramova.
+All code is published under the MIT license.
+Our data-sets are made available under the [Open Data Commons Attribution License](http://opendatacommons.org/licenses/by/1.0/)

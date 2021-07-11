@@ -1,0 +1,3 @@
+# Execute in a Shell with awk installed.
+
+awk -F"," '{print $1}' data/deduplicated_tweets.csv > tweets.txt
