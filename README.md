@@ -32,3 +32,8 @@ For this step, the `process_tweets` step of the provided Makefile can be used.
 
 SentiStrength can be acquired from the [official website](http://sentistrength.wlv.ac.uk/). Then, the `sentiment` target of the Makefile can be executed.
 Afterwards, the `process_sentiment` target of the Makefile will execute the `process_sentiment.py` script for all of the SentiStrength output files produced previously. There exists a `senti` target in the Makefile that combines both of these steps. The python script will execute some calculations and transformations to derive features used in the later analysis. The script can be found in the `/sentiment_senti-strength` directory.
+
+### Dealing With Highly Relevant Accounts
+
+To take into account the impact a large amounts of followers have on subsequent engagement with tweets, we marked tweets from influential people as such.
+For this, the `mark_famous_tweets.rmd` script can be used. All necessary files are already present in the `/relevant_accounts` directory. Otherwise they could be generated using the `socialbakers_conversion.rmd` script. Please note, that you might need to extract the usernames from a previously generated file using `extract_names.rmd`.
