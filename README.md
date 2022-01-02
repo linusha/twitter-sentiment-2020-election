@@ -74,6 +74,6 @@ The code used to provide this data in addition to the above described steps can 
 
 Copyright © 2021 Linus Hagemann, Olga Abramova.
 
-All code is published under the MIT license.
+All code is published under the [MIT license](https://mit-license.org/).
 
-Our data-sets are made available under the [Open Data Commons Attribution License](http://opendatacommons.org/licenses/by/1.0/)
+Our data-sets are made available under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
