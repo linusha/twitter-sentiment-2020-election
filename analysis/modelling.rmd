@@ -1,10 +1,8 @@
 ---
-title: "Modelling"
-author: "Linus Hagemann"
-date: "June 10, 2021"
+title: "Crafting Audience Engagement in Social Media Conversations: Evidence from the U.S. 2020 Presidential Elections -- Modelling"
+author: "Linus Hagemann, Olga Abramova"
 output: pdf_document
 ---
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
@@ -15,195 +13,231 @@ library(qdap)
 library(DataExplorer)
 library(sylcount)
 library(here)
+library(psych)
 here()
-load(here('final_final_data.RData'))
+load(here('../data/data_for_modelling.RData'))
+famous_tweet_data3<-famous_tweet_data[famous_tweet_data$fameLevel=="3",]
 ```
 
+## Descriptive Statistics
+
+```{r}
+descr_total<-describe(tweet_data)
+descr_fam<-describe(famous_tweet_data)
+descr_notfam<-describe(not_famous_tweet_data)
+descr_veryfam<-describe(famous_tweet_data3)
+```
 
 ## Modelling on all Tweets in the data set
 
 ### Modelling Binary Targets
 
-Using logistic regression.
-
 #### Commented
 
 ```{r}
 stargazer(glm(repliedTo ~ hashtagCount + url + 
-               cleanLIWC_WC + user_activity
-                + fameLevel +  #controls
+                cleanLIWC_WC + user_activity + fameLevel +  #controls
                 ct_polarity + ct_sentiment + # emotions
                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-    data = tweet_data,
-    family = binomial(link = 'logit')), type = 'text')
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain+
+                ct_polarity*fameLevel+ ct_sentiment*fameLevel +
+                cleanLIWC_i*fameLevel + cleanLIWC_we*fameLevel + cleanLIWC_they*fameLevel +
+                cleanLIWC_insight*fameLevel + cleanLIWC_cause*fameLevel + cleanLIWC_discrep*fameLevel + cleanLIWC_certain*fameLevel,
+                data = tweet_data,
+                family = binomial(link = 'logit')
+            ),
+        type = 'text')
 ```
 
 #### Liked
 
 ```{r}
 stargazer(glm(liked ~ hashtagCount + url + 
-               cleanLIWC_WC + user_activity
-                + fameLevel + #controls
+               cleanLIWC_WC + user_activity + fameLevel + #controls
                 ct_polarity + ct_sentiment + # emotions
                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-    data = tweet_data,
-    family = binomial(link = 'logit')), type = 'text')
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain +
+                ct_polarity*fameLevel + ct_sentiment*fameLevel +
+                cleanLIWC_i*fameLevel + cleanLIWC_we*fameLevel + cleanLIWC_they*fameLevel +
+                cleanLIWC_insight*fameLevel + cleanLIWC_cause*fameLevel + cleanLIWC_discrep*fameLevel + cleanLIWC_certain*fameLevel,
+                data = tweet_data,
+                family = binomial(link = 'logit')
+            ),
+        type = 'text')
 ```
 
 #### Retweeted
 
 ```{r}
 stargazer(glm(retweeted ~ hashtagCount + url + 
-               cleanLIWC_WC + user_activity
-                + fameLevel + #controls
+               cleanLIWC_WC + user_activity + fameLevel + #controls
                 ct_polarity + ct_sentiment + # emotions
                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-    data = tweet_data,
-    family = binomial(link = 'logit')), type = 'text')
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain +
+                ct_polarity*fameLevel + ct_sentiment*fameLevel +
+                cleanLIWC_i*fameLevel + cleanLIWC_we*fameLevel + cleanLIWC_they*fameLevel +
+                cleanLIWC_insight*fameLevel + cleanLIWC_cause*fameLevel + cleanLIWC_discrep*fameLevel + cleanLIWC_certain*fameLevel,
+                data = tweet_data,
+                family = binomial(link = 'logit')
+            ), 
+        type = 'text')
 ```
 
-### Modelling count on Tweets overall dataset
+### Modelling Count Targets on all Tweets in Dataset
 
 #### Likes
 
 ```{r}
-summary(glm.nb(likes ~ hashtagCount + url + 
-                cleanLIWC_WC + user_activity
-                 + fameLevel+ #controls
-                 ct_polarity + ct_sentiment + # emotions
-                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                 data = tweet_data[tweet_data$likes > 0,],
-                control=glm.control(maxit=100)))
+summary(m1<-glm.nb(likes ~ hashtagCount + url + 
+                cleanLIWC_WC + user_activity + fameLevel + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain +
+                ct_polarity*fameLevel + ct_sentiment*fameLevel +
+                cleanLIWC_i*fameLevel + cleanLIWC_we*fameLevel + cleanLIWC_they*fameLevel +
+                cleanLIWC_insight*fameLevel + cleanLIWC_cause*fameLevel + cleanLIWC_discrep*fameLevel + cleanLIWC_certain*fameLevel,
+                data = tweet_data,
+                control=glm.control(maxit=100)
+            )
+        )
 ```
 
 #### Replies
 
 ```{r}
-summary(glm.nb(replies ~ hashtagCount + url + 
-                cleanLIWC_WC + user_activity
-                 + fameLevel+ #controls
-                 ct_polarity + ct_sentiment + # emotions
-                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                 data = tweet_data[tweet_data$replies > 0,],
-                control=glm.control(maxit=50)))
-```
-
-#### Replies without restriction 
-
-```{r}
-summary(glm.nb(replies ~ hashtagCount + url + 
-                cleanLIWC_WC + user_activity
-                 + fameLevel+ #controls
-                 ct_polarity + ct_sentiment + # emotions
-                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                 data = tweet_data,
-                control=glm.control(maxit=50)))
+summary(m2<-glm.nb(replies ~ hashtagCount + url + 
+                cleanLIWC_WC + user_activity + fameLevel + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain+
+                ct_polarity*fameLevel + ct_sentiment*fameLevel +
+                cleanLIWC_i*fameLevel + cleanLIWC_we*fameLevel + cleanLIWC_they*fameLevel +
+                cleanLIWC_insight*fameLevel + cleanLIWC_cause*fameLevel + cleanLIWC_discrep*fameLevel + cleanLIWC_certain*fameLevel,
+                data = tweet_data,
+                control=glm.control(maxit=50)
+            )
+        )
 ```
 
 #### Retweets
 
 ```{r}
-summary(glm.nb(retweets ~ hashtagCount + url + 
-                cleanLIWC_WC + user_activity
-                 + fameLevel+ #controls
-                 ct_polarity + ct_sentiment + # emotions
-                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                 data = tweet_data[tweet_data$retweets > 0,],
-                control=glm.control(maxit=50)))
+summary(m3<-glm.nb(retweets ~ hashtagCount + url + 
+                cleanLIWC_WC + user_activity + fameLevel + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain +
+                ct_polarity*fameLevel + ct_sentiment*fameLevel +
+                cleanLIWC_i*fameLevel + cleanLIWC_we*fameLevel + cleanLIWC_they*fameLevel +
+                cleanLIWC_insight*fameLevel + cleanLIWC_cause*fameLevel + cleanLIWC_discrep*fameLevel + cleanLIWC_certain*fameLevel,
+                data = tweet_data,
+                control=glm.control(maxit=50)
+            )
+        )
 ```
 
-#### Retweets without restrictions
+### Checking Model Assumptions
+
+See this post about [negative binomial regressions](https://stats.idre.ucla.edu/r/dae/negative-binomial-regression/) from the UCLA website.
 
 ```{r}
-summary(glm.nb(retweets ~ hashtagCount + url + 
-                cleanLIWC_WC + user_activity
-                 + fameLevel+ #controls
-                 ct_polarity + ct_sentiment + # emotions
-                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                 data = tweet_data,
-                control=glm.control(maxit=50)))
+m4 <- glm(likes ~ hashtagCount + url + 
+                cleanLIWC_WC + user_activity + fameLevel + #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain +
+                ct_polarity*fameLevel + ct_sentiment*fameLevel +
+                cleanLIWC_i*fameLevel + cleanLIWC_we*fameLevel + cleanLIWC_they*fameLevel +
+                cleanLIWC_insight*fameLevel + cleanLIWC_cause*fameLevel + cleanLIWC_discrep*fameLevel + cleanLIWC_certain*fameLevel,
+                data = tweet_data,
+                control=glm.control(maxit=100), family = "poisson"
+            )
+pchisq(2 * (logLik(m1) - logLik(m4)), df = 1, lower.tail = FALSE)
+2 * (logLik(m1) - logLik(m4))
 ```
 
-## Modelling on the tweets of important people
+## Modelling on Subsample of Famous Twitter Accounts
 
 ### Comments
 
-
-```{r}
-famous_tweet_data3<-famous_tweet_data[famous_tweet_data$fameLevel=="3",]
-```
-
 ```{r}
 summary(glm.nb(replies ~ hashtagCount + url + 
-               cleanLIWC_WC + user_activity
-                +  #controls
+                cleanLIWC_WC + user_activity +  #controls
                 ct_polarity + ct_sentiment + # emotions
                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                data = famous_tweet_data))
+                data = famous_tweet_data
+            )
+        )
 ```
 
 ### Likes
 
 ```{r}
 summary(glm.nb(likes ~ hashtagCount + url + 
-               cleanLIWC_WC + user_activity
-                +  #controls
+                cleanLIWC_WC + user_activity +  #controls
                 ct_polarity + ct_sentiment + # emotions
                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                data = famous_tweet_data))
-```
-
-```{r}
-summary(famous_tweet_data$likes)
-```
-```{r}
-summary(famous_tweet_data$fameLevel)
-```
-
-```{r}
-plot(famous_tweet_data$ct_sentiment,famous_tweet_data$likes)
-```
-
-```{r}
-summary(glm.nb(likes ~ hashtagCount + url + 
-               cleanLIWC_WC + user_activity
-                + 
-                ct_polarity + ct_sentiment + # emotions
-                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                data = famous_tweet_data))
-```
-
-```{r}
-summary(glm.nb(likes ~ hashtagCount + url + 
-                cleanLIWC_WC + user_activity
-                 + fameLevel + #controls
-                 ct_polarity + ct_sentiment + # emotions
-                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                 control=glm.control(maxit=10),
-                 data = famous_tweet_data))
+                control=glm.control(maxit=10),
+                data = famous_tweet_data
+            )
+        )
 ```
 
 ### Retweets
 
 ```{r}
 summary(glm.nb(retweets ~ hashtagCount + url + 
-                cleanLIWC_WC + user_activity
-                 +  #controls
-                 ct_polarity + ct_sentiment + # emotions
-                 cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
-                 cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
-                 data = famous_tweet_data),
-           control=glm.control(maxit=10))
+                cleanLIWC_WC + user_activity +  #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+                control=glm.control(maxit=10),
+                data = famous_tweet_data
+            )
+        )
+```
+
+## Modelling on Subsample of very Famous Twitter Accounts
+
+### Comments
+
+```{r}
+summary(glm.nb(replies ~ hashtagCount + url + 
+                cleanLIWC_WC + user_activity +  #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+                data = famous_tweet_data3
+            )
+        )
+```
+
+### Likes
+
+```{r}
+summary(glm.nb(likes ~ hashtagCount + url + 
+                cleanLIWC_WC + user_activity +  #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+                control=glm.control(maxit=10),
+                data = famous_tweet_data3
+            )
+        )
+```
+
+### Retweets
+
+```{r}
+summary(glm.nb(retweets ~ hashtagCount + url + 
+                cleanLIWC_WC + user_activity +  #controls
+                ct_polarity + ct_sentiment + # emotions
+                cleanLIWC_i + cleanLIWC_we + cleanLIWC_they + #prosocial
+                cleanLIWC_insight + cleanLIWC_cause + cleanLIWC_discrep + cleanLIWC_certain,
+                control=glm.control(maxit=10),
+                data = famous_tweet_data3
+            )
+        )
 ```
