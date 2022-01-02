@@ -1,5 +1,5 @@
 ---
-title: "Data Merging"
+title: "Crafting Audience Engagement in Social Media Conversations: Evidence from the U.S. 2020 Presidential Elections -- Data Merging"
 author: "Linus Hagemann"
 output: html_document
 ---

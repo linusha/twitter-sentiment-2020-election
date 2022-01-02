@@ -1,7 +1,6 @@
 ---
 title: "Extract Names from Tweets"
 author: "Linus Hagemann"
-date: "June 9, 2021"
 output: pdf_document
 ---
 

@@ -1,7 +1,6 @@
 ---
-title: "Mark Famous Tweets"
+title: "Crafting Audience Engagement in Social Media Conversations: Evidence from the U.S. 2020 Presidential Elections -- Mark Famous Tweets"
 author: "Linus Hagemann"
-date: "June 9, 2021"
 output: pdf_document
 ---
 

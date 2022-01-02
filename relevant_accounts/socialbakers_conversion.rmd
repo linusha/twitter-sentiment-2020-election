@@ -1,7 +1,6 @@
 ---
-title: "Convert socialbakers to Usable Format"
+title: "Crafting Audience Engagement in Social Media Conversations: Evidence from the U.S. 2020 Presidential Elections -- Convert socialbakers List to Usable Format"
 author: "Linus Hagemann"
-date: "June 9, 2021"
 output: pdf_document
 ---
 

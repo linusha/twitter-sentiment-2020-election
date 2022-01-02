@@ -1,7 +1,6 @@
 ---
-title: "Twitter Election Sentiment Feature Creation I"
+title: "Crafting Audience Engagement in Social Media Conversations: Evidence from the U.S. 2020 Presidential Elections -- Feature Creation"
 author: "Linus Hagemann"
-date: "June 7, 2021"
 output: pdf_document
 ---
 
@@ -62,31 +61,6 @@ tweet_data$repliedTo <- ifelse(tweet_data$replies != 0, TRUE, FALSE)
 # this should be reasonable in grand scheme of things
 # we need to base this on the original tweet, since otherwise the # are already removed
 tweet_data$hashtagCount <- lapply(tweet_data$original_tweet, stringr::str_count, pattern = '#')
-```
-
-## Length of Tweet in Characters
-
-```{r}
-# will be again based on the original tweet, since that is what user users saw and interacted with
-tweet_data$charLength <- lapply(tweet_data$original_tweet, nchar)
-```
-
-## Positive Interaction Term
-
-From the previous code, we already have an interaction term in our data.
-It is defined to be $negative \times sentiment$.
-
-Rename it to avoid confusion and create the positive interaction term as well:
-
-```{r}
-tweet_data$ct_negative_interaction <- tweet_data$ct_interactionTerm
-tweet_data$ct_positive_interaction <- tweet_data$ct_sentiment * tweet_data$ct_positiveScore
-```
-
-## Mirror negative score to be easier to interpret
-
-```{r}
-tweet_data$ct_negativeScoreToUse <- tweet_data$ct_negativeScore * -1
 ```
 
 # Export

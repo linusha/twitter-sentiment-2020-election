@@ -1,7 +1,6 @@
 ---
-title: "Data Publication"
+title: "Crafting Audience Engagement in Social Media Conversations: Evidence from the U.S. 2020 Presidential Elections -- Data Publication"
 author: "Linus Hagemann"
-date: "July 11, 2021"
 output: html_document
 ---
 
