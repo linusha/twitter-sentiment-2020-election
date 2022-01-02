@@ -1,5 +1,12 @@
-# twitter-sentiment-2020-election
+# Crafting Audience Engagement in Social Media Conversations: Evidence from the U.S. 2020 Presidential Elections
 
+This repository contains code and data used in the research paper
+
+
+>Hagemann, L., Abramova, O. (2022). Crafting Audience Engagement in Social Media Conversations: Evidence from the U.S. 2020 Presidential Elections. In *Proceedings of the 55th Hawaii International Conference on System Sciences*, pp. 3222-3231. https://hdl.handle.net/10125/79729.
+
+
+Please note the linceses specified below and cite the paper when possible.
 
 ## Process Documentation
 
