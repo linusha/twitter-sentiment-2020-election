@@ -5,8 +5,9 @@ This repository contains code and data used in the research paper
 
 >Hagemann, L., Abramova, O. (2022). Crafting Audience Engagement in Social Media Conversations: Evidence from the U.S. 2020 Presidential Elections. In *Proceedings of the 55th Hawaii International Conference on System Sciences*, pp. 3222-3231. https://hdl.handle.net/10125/79729.
 
-
 Please note the linceses specified below and cite the paper when possible.
+
+**An extended version of this research has been submitted to [Internet Research](https://www.emeraldgrouppublishing.com/journal/intr) within a manuscript entitled "Sentiment, We-talk and Engagement on Social Media: Insights from Twitter Data Mining on the U.S. Presidential Elections 2020".** Additional files for this publication can be found on a separate [branch](https://github.com/linusha/twitter-sentiment-2020-election/tree/internet-research) inside of this repository.
 
 ## Process Documentation
 
