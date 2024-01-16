@@ -9,6 +9,11 @@ Please note the linceses specified below and cite the paper when possible.
 
 **An extended version of this research has been submitted to [Internet Research](https://www.emeraldgrouppublishing.com/journal/intr) within a manuscript entitled "Sentiment, We-talk and Engagement on Social Media: Insights from Twitter Data Mining on the U.S. Presidential Elections 2020".** Additional files for this publication can be found on a separate [branch](https://github.com/linusha/twitter-sentiment-2020-election/tree/internet-research) inside of this repository.
 
+When using the information contained on this branch, please cite the following paper when possible:
+
+>  Hagemann, L. and Abramova, O. (2023), "Sentiment, we-talk and engagement on social media: insights from Twitter data mining on the US presidential elections 2020", *Internet Research*, Vol. 33 No. 6, pp. 2058-2085. https://doi.org/10.1108/INTR-12-2021-0885.
+
+
 ## Process Documentation
 
 The following paragraphs should give you a good overview of how to use the scripts in this repository given previous exposure to the command line, `python` and `R`. Please see the corresponding publication for further details. This repository utilizes [Git Large File Storage](https://git-lfs.github.com/).
