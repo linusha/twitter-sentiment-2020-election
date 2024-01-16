@@ -7,7 +7,7 @@ This repository contains code and data used in the research paper
 
 Please note the linceses specified below and cite the paper when possible.
 
-**An extended version of this research has been submitted to [Internet Research](https://www.emeraldgrouppublishing.com/journal/intr) within a manuscript entitled "Sentiment, We-talk and Engagement on Social Media: Insights from Twitter Data Mining on the U.S. Presidential Elections 2020".** Additional files for this publication can be found on a separate [branch](https://github.com/linusha/twitter-sentiment-2020-election/tree/internet-research) inside of this repository.
+**An extended version of this research has been published in [Internet Research](https://www.emeraldgrouppublishing.com/journal/intr) titled "Sentiment, We-talk and Engagement on Social Media: Insights from Twitter Data Mining on the U.S. Presidential Elections 2020".** Additional files and information for this publication can be found on a separate [branch](https://github.com/linusha/twitter-sentiment-2020-election/tree/internet-research) inside of this repository.
 
 ## Process Documentation
 
